@@ -5,18 +5,15 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const clientId = '96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com'; // Replace with your actual Google client ID
-const recaptchaKey = '6Lfty3MqAAAAACp-CJm8DFxDW1GfjdR1aXqHbqpg'; // Replace with your reCAPTCHA Site Key
+const clientId = '96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com';
+const recaptchaKey = '6Lfty3MqAAAAACp-CJm8DFxDW1GfjdR1aXqHbqpg';
 
 function Login() {
     const navigate = useNavigate();
     const [recaptchaValue, setRecaptchaValue] = useState(null);
-    const [isRecaptchaValid, setIsRecaptchaValid] = useState(false); // State for reCAPTCHA validity
+    const [isRecaptchaValid, setIsRecaptchaValid] = useState(false);
 
     const onSuccess = async (credentialResponse) => {
-        console.log("Login Success:", credentialResponse);
-
-        // Check if reCAPTCHA was verified
         if (!recaptchaValue) {
             alert("Please complete the reCAPTCHA.");
             return;
@@ -28,22 +25,22 @@ function Login() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ token: credentialResponse.credential, recaptcha: recaptchaValue }), // Send recaptcha value to the server
+                body: JSON.stringify({ token: credentialResponse.credential, recaptcha: recaptchaValue }),
             });
 
             const data = await response.json();
 
-            console.log("Backend response:", data);
-
             if (response.ok) {
-                localStorage.setItem('authToken', credentialResponse.credential); // Store token
-                localStorage.setItem('userInfo', JSON.stringify(data.user)); // Store user info
+                localStorage.setItem('authToken', credentialResponse.credential);
+                localStorage.setItem('userInfo', JSON.stringify(data.user));
 
-                // Navigate to the appropriate dashboard based on the role
+                // Redirect based on user role
                 if (data.user.role === 'admin') {
                     navigate('/admin');
                 } else if (data.user.role === 'user') {
                     navigate('/user');
+                } else {
+                    alert("Access denied: No role assigned.");
                 }
             } else {
                 console.log("Login Failed:", data.message);
@@ -60,10 +57,9 @@ function Login() {
         alert("Login failed. Please try again.");
     };
 
-    // Callback when reCAPTCHA is successfully completed
     const onRecaptchaChange = (value) => {
         setRecaptchaValue(value);
-        setIsRecaptchaValid(true); // Set the reCAPTCHA validity state to true
+        setIsRecaptchaValid(true);
     };
 
     return (
@@ -76,7 +72,7 @@ function Login() {
                 <GoogleLogin
                     onSuccess={onSuccess}
                     onError={onError}
-                    disabled={!isRecaptchaValid} // Disable button if reCAPTCHA is not completed
+                    disabled={!isRecaptchaValid}
                 />
             </div>
         </GoogleOAuthProvider>
