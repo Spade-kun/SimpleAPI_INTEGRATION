@@ -2,7 +2,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import AdminDashboard from './components/AdminDashboard';
+import UserDashboard from './components/UserDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -10,14 +11,16 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/admin" element={
+        <ProtectedRoute role="admin">
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/user" element={
+        <ProtectedRoute role="user">
+          <UserDashboard />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }

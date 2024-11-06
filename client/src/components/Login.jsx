@@ -1,5 +1,4 @@
 // src/components/Login.jsx
-
 import React, { useState } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
@@ -13,43 +12,37 @@ function Login() {
     const [recaptchaValue, setRecaptchaValue] = useState(null);
     const [isRecaptchaValid, setIsRecaptchaValid] = useState(false);
 
-    const onSuccess = async (credentialResponse) => {
-        if (!recaptchaValue) {
-            alert("Please complete the reCAPTCHA.");
-            return;
-        }
+    const onSuccess = (credentialResponse) => {
+        console.log("Login Success:", credentialResponse);
+        const { credential } = credentialResponse;
 
-        try {
-            const response = await fetch('http://localhost:3000/login/google', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token: credentialResponse.credential, recaptcha: recaptchaValue }),
-            });
+        fetch('http://localhost:3000/login/google', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: credential }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.message === 'Login successful') {
+                    // Store the session token in localStorage
+                    localStorage.setItem('sessionToken', data.token);
 
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('authToken', credentialResponse.credential);
-                localStorage.setItem('userInfo', JSON.stringify(data.user));
-
-                // Redirect based on user role
-                if (data.user.role === 'admin') {
-                    navigate('/admin');
-                } else if (data.user.role === 'user') {
-                    navigate('/user');
+                    // Redirect based on the user's role
+                    if (data.user.role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/user');
+                    }
                 } else {
-                    alert("Access denied: No role assigned.");
+                    alert(data.message);
                 }
-            } else {
-                console.log("Login Failed:", data.message);
-                alert("Login failed: " + data.message);
-            }
-        } catch (error) {
-            console.error("Fetch error:", error);
-            alert("An error occurred while logging in.");
-        }
+            })
+            .catch((error) => {
+                console.error("Error during login:", error);
+                alert("Login failed: An error occurred while logging in.");
+            });
     };
 
     const onError = () => {

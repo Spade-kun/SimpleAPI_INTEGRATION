@@ -1,26 +1,19 @@
 // src/components/ProtectedRoute.jsx
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-function ProtectedRoute({ children }) {
-    const isAuthenticated = localStorage.getItem('authToken'); // Check if user is logged in
-    const userInfo = JSON.parse(localStorage.getItem('userInfo')); // Get user info from localStorage
-
-    // Check if user is authenticated and has a role
-    if (!isAuthenticated || !userInfo) {
+const ProtectedRoute = ({ children, role }) => {
+    const token = localStorage.getItem('sessionToken');
+    if (!token) {
         return <Navigate to="/login" />;
     }
 
-    // Redirect based on role
-    if (userInfo.role === 'admin') {
-        return children; // Allow access to the admin component
-    } else if (userInfo.role === 'user') {
-        return children; // Allow access to the user component
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
+    if (decodedToken.role !== role) {
+        return <Navigate to="/login" />;
     }
 
-    // Reject login if no valid role
-    return <Navigate to="/login" />;
-}
+    return children;
+};
 
 export default ProtectedRoute;
