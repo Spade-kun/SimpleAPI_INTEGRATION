@@ -7,21 +7,21 @@ function UserDashboard() {
 
     useEffect(() => {
         // Check if token is expired and auto logout
-        const token = localStorage.getItem('sessionToken');
+        const token = sessionStorage.getItem('sessionToken');
         if (!token) {
             navigate('/login');
         } else {
             const decodedToken = JSON.parse(atob(token.split('.')[1]));
             const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
             if (decodedToken.exp < currentTime) {
-                localStorage.removeItem('sessionToken');
+                sessionStorage.removeItem('sessionToken');
                 navigate('/login');
             }
         }
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('sessionToken'); // Remove token from localStorage
+        sessionStorage.removeItem('sessionToken'); // Remove token from sessionStorage
         navigate('/login');
     };
 

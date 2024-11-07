@@ -26,8 +26,8 @@ function Login() {
             .then((response) => response.json())
             .then((data) => {
                 if (data.message === 'Login successful') {
-                    // Store the session token in localStorage
-                    localStorage.setItem('sessionToken', data.token);
+                    // Store the session token in sessionStorage
+                    sessionStorage.setItem('sessionToken', data.token);
 
                     // Redirect based on the user's role
                     if (data.user.role === 'admin') {
