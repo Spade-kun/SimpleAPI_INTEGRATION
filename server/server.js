@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User'); // Import User model
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -114,6 +115,9 @@ app.post('/login/google', async (req, res) => {
         res.status(401).json({ message: 'Invalid token' });
     }
 });
+
+// Use the user routes
+app.use('/users', userRoutes);
 
 // Logout route to clear the session
 app.post('/logout', (req, res) => {

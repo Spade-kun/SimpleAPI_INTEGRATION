@@ -20,9 +20,11 @@
     "google-auth-library": "^9.14.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0",
+    "mongoose-sequence": "^6.0.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "passport-google-token": "^0.1.2"
+    "passport-google-token": "^0.1.2",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
