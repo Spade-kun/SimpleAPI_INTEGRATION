@@ -1,18 +1,33 @@
 const Document = require('../models/Document'); // Import the Document model
 
 const requestDocument = async (req, res) => {
-    const { docID, title, content } = req.body; // Expect docID to be included
+    const { title, content, department } = req.body; // docID is no longer needed in the request body
 
     try {
-        // Check if docID already exists in the database
-        const existingDocument = await Document.findOne({ docID });
-        if (existingDocument) {
-            return res.status(400).json({ message: `Document with docID ${docID} already exists!` });
+        // Find the document with the highest docID (sort by docID in descending order)
+        const lastDocument = await Document.findOne().sort({ docID: -1 }); // Sort by docID in descending order to get the last document
+
+        let newDocID = 1; // Default docID if no documents exist (starting from 1)
+
+        if (lastDocument) {
+            // Increment the last docID by 1
+            newDocID = lastDocument.docID + 1;
         }
 
-        const newDocument = new Document({ docID, title, content });
-        await newDocument.save(); // Save the new document with the given docID
-        res.status(201).json({ message: `Document ${docID} created successfully!`, document: newDocument });
+        // Create a new document with auto-generated docID
+        const newDocument = new Document({
+            docID: newDocID, // Set the auto-incremented docID
+            title,
+            content,
+            department,
+        });
+
+        await newDocument.save(); // Save the new document with the generated docID
+
+        res.status(201).json({
+            message: `Document ${newDocID} created successfully!`,
+            document: newDocument,
+        });
     } catch (error) {
         res.status(400).json({ message: 'Error creating document', error });
     }

@@ -10,7 +10,7 @@ function AdminDashboard() {
     const [editUser, setEditUser] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newUser, setNewUser] = useState({ userID: '', email: '', name: '', role: '', department: '' });
+    const [newUser, setNewUser] = useState({ email: '', name: '', role: '', department: '' });
     const navigate = useNavigate();
 
     // Fetch users whenever the component mounts or when a user is added/updated
@@ -59,7 +59,7 @@ function AdminDashboard() {
     };
 
     const handleAddUser = () => {
-        setNewUser({ userID: '', email: '', name: '', role: '', department: '' });
+        setNewUser({ email: '', name: '', role: '', department: '' });
         setIsAddModalOpen(true);
     };
 
@@ -159,12 +159,7 @@ function AdminDashboard() {
             {isAddModalOpen && (
                 <Modal isOpen={isAddModalOpen} onRequestClose={() => setIsAddModalOpen(false)}>
                     <h2>Add User</h2>
-                    <input
-                        type="text"
-                        placeholder="User ID"
-                        value={newUser.userID}
-                        onChange={(e) => setNewUser({ ...newUser, userID: e.target.value })}
-                    />
+                    {/* Removed userID input field */}
                     <input
                         type="text"
                         placeholder="Email"

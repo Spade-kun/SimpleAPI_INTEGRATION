@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 // Create a new user
 const createUser = async (req, res) => {
-    const { email, role, name, picture, department, userID } = req.body;
+    const { email, role, name, picture, department } = req.body; // No need to pass userID in request body
 
     try {
         const existingUser = await User.findOne({ email });
@@ -10,14 +10,18 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create a new user with the provided userID
+        // Find the last inserted user and increment userID
+        const lastUser = await User.findOne().sort({ userID: -1 }); // Sort by userID in descending order
+        const nextUserID = lastUser ? lastUser.userID + 1 : 1; // If no user exists, start from 1
+
+        // Create a new user with auto-incremented userID
         const newUser = new User({
             email,
             role,
             name,
             picture,
             department,
-            userID,
+            userID: nextUserID, // Set the incremented userID
         });
 
         // Call the generateGoogleId method before saving if googleId is not provided
@@ -32,6 +36,7 @@ const createUser = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 // Fetch all users
 const getAllUsers = async (req, res) => {
