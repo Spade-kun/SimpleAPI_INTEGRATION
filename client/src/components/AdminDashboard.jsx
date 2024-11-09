@@ -1,87 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import DataTable from 'react-data-table-component'; // Import DataTable
+import DataTable from 'react-data-table-component';
+import Modal from 'react-modal';
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [editUser, setEditUser] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newUser, setNewUser] = useState({ userID: '', email: '', name: '', role: '', department: '' });
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // Check if token is expired and auto logout
-        const token = sessionStorage.getItem('sessionToken');
-        if (!token) {
-            navigate('/login');
-        } else {
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
-            const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
-            if (decodedToken.exp < currentTime) {
-                sessionStorage.removeItem('sessionToken');
-                navigate('/login');
-            }
+    // Fetch users whenever the component mounts or when a user is added/updated
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/users/');
+            setUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
         }
-    }, [navigate]);
+    };
+
+    useEffect(() => {
+        fetchUsers(); // Initial fetch of users
+    }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem('sessionToken'); // Remove token from sessionStorage
+        sessionStorage.removeItem('sessionToken');
         navigate('/login');
     };
 
-    // Fetch all users from the backend
-    useEffect(() => {
-        const fetchUsers = async () => {
+    const handleEditUser = (user) => {
+        setEditUser(user);
+        setIsEditModalOpen(true);
+    };
+
+    const confirmEditUser = async () => {
+        try {
+            await axios.patch(`http://localhost:3000/users/${editUser.userID}`, editUser);
+            fetchUsers(); // Fetch updated list after edit
+            setIsEditModalOpen(false);
+        } catch (error) {
+            console.error('Error updating user:', error);
+        }
+    };
+
+    const handleDeleteUser = async (userID) => {
+        if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.get('http://localhost:3000/users/'); // Replace with your actual API endpoint
-                setUsers(response.data); // Store users in state
+                await axios.delete(`http://localhost:3000/users/${userID}`);
+                fetchUsers(); // Fetch updated list after deletion
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('Error deleting user:', error);
             }
-        };
+        }
+    };
 
-        fetchUsers();
-    }, []);
+    const handleAddUser = () => {
+        setNewUser({ userID: '', email: '', name: '', role: '', department: '' });
+        setIsAddModalOpen(true);
+    };
 
-    // Filter users based on the search term
-    const filteredUsers = users.filter(user =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by email
-    );
+    const confirmAddUser = async () => {
+        try {
+            await axios.post('http://localhost:3000/users/register', newUser);
+            fetchUsers(); // Fetch updated list after adding user
+            setIsAddModalOpen(false); // Close modal after adding user
+        } catch (error) {
+            console.error('Error adding user:', error);
+        }
+    };
 
-    // Data table columns configuration
     const columns = [
-        {
-            name: 'UserID',
-            selector: row => row.userID,
-            sortable: true,
-        },
-        {
-            name: 'Email',
-            selector: row => row.email,
-            sortable: true,
-        },
-        {
-            name: 'Name',
-            selector: row => row.name,
-            sortable: true,
-        },
-        {
-            name: 'Role',
-            selector: row => row.role,
-            sortable: true,
-        },
-        {
-            name: 'Department',
-            selector: row => row.department,
-            sortable: true,
-        },
+        { name: 'UserID', selector: (row) => row.userID, sortable: true },
+        { name: 'Email', selector: (row) => row.email, sortable: true },
+        { name: 'Name', selector: (row) => row.name, sortable: true },
+        { name: 'Role', selector: (row) => row.role, sortable: true },
+        { name: 'Department', selector: (row) => row.department, sortable: true },
         {
             name: 'Actions',
-            button: true,
-            cell: row => (
+            cell: (row) => (
                 <div>
-                    {/* Add Edit and Delete actions here */}
-                    <button>Edit</button>
-                    <button>Delete</button>
+                    <button onClick={() => handleEditUser(row)}>Edit</button>
+                    <button onClick={() => handleDeleteUser(row.userID)}>Delete</button>
                 </div>
             ),
         },
@@ -92,30 +95,104 @@ function AdminDashboard() {
             <h1>Admin Dashboard</h1>
             <p>Welcome, Admin! Here you can manage users and view reports.</p>
 
-            {/* Button to add user */}
-            <button onClick={() => navigate('/add-user')}>Add User</button>
+            {/* Add User button */}
+            <button onClick={handleAddUser}>Add User</button>
 
             {/* Search bar */}
             <input
                 type="text"
                 placeholder="Search by Email"
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ margin: '20px 0', padding: '8px', width: '300px' }}
             />
 
-            {/* DataTable component */}
+            {/* DataTable */}
             <DataTable
                 title="Users List"
                 columns={columns}
-                data={filteredUsers}  // Use filtered users
+                data={users.filter((user) =>
+                    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+                )}
                 pagination
-                search
                 highlightOnHover
                 striped
             />
 
+            {/* Logout button */}
             <button onClick={handleLogout}>Logout</button>
+
+            {/* Edit Modal */}
+            {isEditModalOpen && (
+                <Modal isOpen={isEditModalOpen} onRequestClose={() => setIsEditModalOpen(false)}>
+                    <h2>Edit User</h2>
+                    <input
+                        type="text"
+                        placeholder="Email"
+                        value={editUser.email}
+                        onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={editUser.name}
+                        onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Role"
+                        value={editUser.role}
+                        onChange={(e) => setEditUser({ ...editUser, role: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Department"
+                        value={editUser.department}
+                        onChange={(e) => setEditUser({ ...editUser, department: e.target.value })}
+                    />
+                    <button onClick={confirmEditUser}>Confirm</button>
+                    <button onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                </Modal>
+            )}
+
+            {/* Add Modal */}
+            {isAddModalOpen && (
+                <Modal isOpen={isAddModalOpen} onRequestClose={() => setIsAddModalOpen(false)}>
+                    <h2>Add User</h2>
+                    <input
+                        type="text"
+                        placeholder="User ID"
+                        value={newUser.userID}
+                        onChange={(e) => setNewUser({ ...newUser, userID: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={newUser.name}
+                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Role"
+                        value={newUser.role}
+                        onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Department"
+                        value={newUser.department}
+                        onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+                    />
+                    <button onClick={confirmAddUser}>Confirm</button>
+                    <button onClick={() => setIsAddModalOpen(false)}>Cancel</button>
+                </Modal>
+            )}
         </div>
     );
 }

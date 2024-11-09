@@ -5,8 +5,9 @@ const passport = require('passport');
 const connectDB = require('./config/db');
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
-const User = require('./models/User'); // Import User model
+const User = require('./models/User');
 const userRoutes = require('./routes/userRoutes');
+const documentRoutes = require('./routes/documentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -118,6 +119,8 @@ app.post('/login/google', async (req, res) => {
 
 // Use the user routes
 app.use('/users', userRoutes);
+app.use('/documents', documentRoutes);
+
 
 // Logout route to clear the session
 app.post('/logout', (req, res) => {

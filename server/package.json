@@ -18,6 +18,7 @@
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "google-auth-library": "^9.14.2",
+    "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0",
     "mongoose-sequence": "^6.0.1",
