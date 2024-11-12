@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import Modal from "react-modal";
 import "./components-css/AdminDashboard.css";
-import Sidebar from "./Sidebar/AdminSidebar";
+import { List } from "react-bootstrap-icons";
+import AdminSidebar from "./Sidebar/AdminSidebar";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -12,6 +13,11 @@ function AdminDashboard() {
   const [editUser, setEditUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const [newUser, setNewUser] = useState({
     email: "",
     name: "",
@@ -102,9 +108,16 @@ function AdminDashboard() {
 
   return (
     <div className="admin-layout">
-      <Sidebar />
-      <div className="admin-container">
-        {/* Your existing content stays exactly the same */}
+      {/* Hamburger Icon */}
+      <button className="hamburger-icon" onClick={toggleSidebar}>
+        <List size={15} />
+      </button>
+
+      {/* Sidebar */}
+      <AdminSidebar isOpen={isSidebarOpen} />
+
+      {/* Main Content */}
+      <div className={`admin-container ${isSidebarOpen ? "with-sidebar" : ""}`}>
         <div className="admin-header">
           <h1>Admin Dashboard</h1>
           <p>Welcome, Admin! Here you can manage users and view reports.</p>
@@ -119,7 +132,10 @@ function AdminDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button className="logout" onClick={handleLogout}>
+          <button
+            className="logout logout-button logout-"
+            onClick={handleLogout}
+          >
             Logout
           </button>
         </div>

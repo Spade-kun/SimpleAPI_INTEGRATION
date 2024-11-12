@@ -1,25 +1,28 @@
-// src/components/Sidebar/AdminSidebar.jsx
 import React from "react";
-// import "./Sidebar.css";
-import { Link } from "react-router-dom";
-import { PersonCircle } from "react-bootstrap-icons";
-import { Badge } from "react-bootstrap";
+import { useNavigate, Link } from "react-router-dom";
+import { Button, Badge, ListGroup } from "react-bootstrap";
+import {
+  PersonCircle,
+  Speedometer2,
+  FileEarmark,
+  GearFill,
+  People,
+  BoxArrowRight,
+} from "react-bootstrap-icons";
+import "./../components-css/AdminSidebar.css";
 
-function Sidebar() {
+function AdminSidebar({ isOpen }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("sessionToken");
+    navigate("/login");
+  };
+
   return (
-    <div className="sidebar">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        fill="currentColor"
-        class="bi bi-border-width"
-        viewBox="0 0 16 16"
-      >
-        <path d="M0 3.5A.5.5 0 0 1 .5 3h15a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5zm0 5A.5.5 0 0 1 .5 8h15a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h15a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5" />
-      </svg>
+    <div className={`sidebar ${isOpen ? "open" : ""}`}>
       {/* Logo */}
-      <div className="d-flex justify-content-center">
+      <div className="d-flex justify-content-center mb-4">
         <img
           src="./src/assets/userlogo.svg"
           alt="Logo"
@@ -30,16 +33,26 @@ function Sidebar() {
 
       {/* User Info */}
       <div className="text-center mb-4">
-        <PersonCircle size={48} /> {/* Bootstrap icon with size */}
+        <PersonCircle size={48} />
         <h5 className="mt-2">Administrator</h5>
         <Badge bg="danger">Admin</Badge>
       </div>
 
-      <Link to="/admin">Dashboard</Link>
+      {/* Navigation Links */}
+      <ListGroup className="sidebar-nav mb-4">
+        <ListGroup.Item as={Link} to="/admin" className="sidebar-item" action>
+          <Speedometer2 className="me-3" /> Dashboard
+        </ListGroup.Item>
+      </ListGroup>
 
-      {/* Add more links as needed */}
+      {/* Logout Button */}
+      <div className="mt-auto">
+        <Button variant="danger" className="w-100" onClick={handleLogout}>
+          <BoxArrowRight className="me-2" /> Log Out
+        </Button>
+      </div>
     </div>
   );
 }
 
-export default Sidebar;
+export default AdminSidebar;
