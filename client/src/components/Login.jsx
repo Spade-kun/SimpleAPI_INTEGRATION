@@ -68,12 +68,12 @@ function Login() {
           </p>
           <div className="logo-container">
             <img
-              src="./src/assets/newbuksu.png"
+              src="../src/assets/newbuksu.png"
               alt="Buksu Logo"
               className="buksu-logo"
             />
             <img
-              src="./src/assets/logo.png"
+              src="../src/assets/logo.png"
               alt="QA Logo"
               className="qa-logo"
             />
