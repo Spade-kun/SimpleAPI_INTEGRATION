@@ -1,8 +1,8 @@
+// src/components/AdminSidebar.jsx
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button, Badge, ListGroup } from "react-bootstrap";
 import {
-  PersonCircle,
   Speedometer2,
   FileEarmark,
   GearFill,
@@ -14,8 +14,14 @@ import "./../components-css/AdminSidebar.css";
 function AdminSidebar({ isOpen }) {
   const navigate = useNavigate();
 
+  // Retrieve user information from sessionStorage
+  const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+  const googlePicture = sessionStorage.getItem("googlePicture");
+
   const handleLogout = () => {
     sessionStorage.removeItem("sessionToken");
+    sessionStorage.removeItem("userInfo");
+    sessionStorage.removeItem("googlePicture");
     navigate("/login");
   };
 
@@ -33,9 +39,18 @@ function AdminSidebar({ isOpen }) {
 
       {/* User Info */}
       <div className="text-center mb-4">
-        <PersonCircle size={48} />
-        <h5 className="mt-2">Administrator</h5>
-        <Badge bg="danger">Admin</Badge>
+        {googlePicture ? (
+          <img
+            src={googlePicture}
+            alt="Profile"
+            className="rounded-circle"
+            style={{ width: "48px", height: "48px" }}
+          />
+        ) : (
+          <PersonCircle size={48} />
+        )}
+        <h5 className="mt-2">{userInfo?.name || "Administrator"}</h5>
+        <Badge bg="danger">{userInfo?.role || "Admin"}</Badge>
       </div>
 
       {/* Navigation Links */}
@@ -43,6 +58,7 @@ function AdminSidebar({ isOpen }) {
         <ListGroup.Item as={Link} to="/admin" className="sidebar-item" action>
           <Speedometer2 className="me-3" /> Dashboard
         </ListGroup.Item>
+        {/* Other links */}
       </ListGroup>
 
       {/* Logout Button */}

@@ -5,13 +5,11 @@ import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./components-css/Login.css";
 
-const clientId =
-  "96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com";
+const clientId = "96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com";
 const recaptchaKey = "6Lfty3MqAAAAACp-CJm8DFxDW1GfjdR1aXqHbqpg";
 
 function Login() {
   const navigate = useNavigate();
-  const [recaptchaValue, setRecaptchaValue] = useState(null);
   const [isRecaptchaValid, setIsRecaptchaValid] = useState(false);
 
   const onSuccess = (credentialResponse) => {
@@ -31,11 +29,17 @@ function Login() {
           // Store the session token in sessionStorage
           sessionStorage.setItem("sessionToken", data.token);
 
+          // Store user information in sessionStorage
+          sessionStorage.setItem("userInfo", JSON.stringify(data.user));
+          sessionStorage.setItem("googlePicture", data.user.picture);
+
           // Redirect based on the user's role
           if (data.user.role === "admin") {
             navigate("/admin");
-          } else {
+          } else if (data.user.role === "user") {
             navigate("/user");
+          } else {
+            alert("Unknown role. Contact support.");
           }
         } else {
           alert(data.message);
@@ -53,8 +57,7 @@ function Login() {
   };
 
   const onRecaptchaChange = (value) => {
-    setRecaptchaValue(value);
-    setIsRecaptchaValid(true);
+    setIsRecaptchaValid(!!value);
   };
 
   return (
@@ -62,10 +65,7 @@ function Login() {
       <div className="login-page">
         <div className="left-section">
           <h2>Document Request System</h2>
-          <p>
-            Quick, easy, and secure: Quality Assurance Office Document Request
-            System
-          </p>
+          <p>Quick, easy, and secure: Quality Assurance Office Document Request System</p>
           <div className="logo-container">
             <img
               src="../src/assets/newbuksu.png"
