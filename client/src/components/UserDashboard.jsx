@@ -1,9 +1,12 @@
-// src/components/UserDashboard.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UserSidebar from "./Sidebar/UserSidebar";
+import "./components-css/UserDashboard.css";
+import { List } from "react-bootstrap-icons";
 
 function UserDashboard() {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     // Check if token is expired and auto logout
@@ -25,14 +28,58 @@ function UserDashboard() {
     navigate("/login");
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  // Sample data for table
+  const sampleData = [
+    { id: 1, name: "John Doe", email: "john@example.com", role: "User" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Admin" },
+    { id: 3, name: "Bob Johnson", email: "bob@example.com", role: "User" },
+  ];
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>User Dashboard</h1>
-      <p>
-        Welcome, User! Here you can view your requests and manage your profile.
-      </p>
-      {/* Add user functionalities here */}
-      <button onClick={handleLogout}>Logout</button>
+    <div className="user-dashboard-container">
+      <UserSidebar isOpen={isSidebarOpen} />
+      <div
+        className="user-dashboard-content"
+        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
+      >
+        <button className="hamburger-icon" onClick={toggleSidebar}>
+          <List size={24} />
+        </button>
+        <div>
+          <h1>User Dashboard</h1>
+          <p>
+            Welcome, User! Here you can view your requests and manage your
+            profile.
+          </p>
+          <button onClick={handleLogout}>Logout</button>
+
+          {/* Sample Data Table */}
+          <h2>User Data</h2>
+          <table className="user-data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sampleData.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

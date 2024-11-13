@@ -110,7 +110,7 @@ function AdminDashboard() {
     <div className="admin-layout">
       {/* Hamburger Icon */}
       <button className="hamburger-icon" onClick={toggleSidebar}>
-        <List size={15} />
+        <List size={10} />
       </button>
 
       {/* Sidebar */}
@@ -119,8 +119,10 @@ function AdminDashboard() {
       {/* Main Content */}
       <div className={`admin-container ${isSidebarOpen ? "with-sidebar" : ""}`}>
         <div className="admin-header">
-          <h1>Admin Dashboard</h1>
-          <p>Welcome, Admin! Here you can manage users and view reports.</p>
+          <h1 style={{ marginLeft: "10vh" }}>Admin Dashboard</h1>
+          <p style={{ marginLeft: "10vh" }}>
+            Welcome, Admin! Here you can manage users and view reports.
+          </p>
         </div>
 
         <div className="admin-controls">
