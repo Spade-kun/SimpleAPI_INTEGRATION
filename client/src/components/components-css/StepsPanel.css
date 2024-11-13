@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Allura&family=Merienda:wght@300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+h3 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bolder;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.9);
+}
+h5 {
+  font-family: "Montserrat", sans-serif;
+  font-style: italic;
+  font-weight: bolder;
+}
+p {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+}

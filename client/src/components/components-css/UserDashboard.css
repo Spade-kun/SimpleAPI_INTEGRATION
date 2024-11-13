@@ -1,11 +1,20 @@
 .user-dashboard-container {
   display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .user-dashboard-content {
   flex: 1;
   padding: 20px;
   transition: margin-left 0.3s ease;
+  display: flex;
+  margin-right: 300px;
+}
+/* Main content area */
+.main-content {
+  flex: 1;
+  padding-right: 20px;
 }
 
 .sidebar.open {
@@ -19,6 +28,10 @@
   color: black;
   padding: 20px;
   transition: transform 0.3s ease;
+  position: fixed;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
 }
 
 .sidebar.closed {
@@ -37,7 +50,34 @@
   border: none;
   color: #333;
   cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
 }
+@media screen and (max-width: 1200px) {
+  .steps-panel {
+    width: 250px;
+  }
+
+  .user-dashboard-content {
+    margin-right: 250px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .steps-panel {
+    display: none; /* Hide steps panel on mobile */
+  }
+
+  .user-dashboard-content {
+    margin-right: 0;
+    padding: 10px;
+  }
+
+  .user-data-table {
+    font-size: 14px;
+  }
+}
+
 .user-data-table {
   width: 100%;
   border-collapse: collapse;
@@ -62,4 +102,27 @@
 
 .user-data-table tr:hover {
   background-color: #f1f1f1;
+}
+/* Steps Panel (Right Sidebar) Styles */
+.steps-panel {
+  width: 300px;
+  min-width: 300px;
+  height: 100vh;
+  background-color: blue;
+  padding: 20px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.steps-panel h2 {
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+.steps-panel h3 {
+  color: white;
 }

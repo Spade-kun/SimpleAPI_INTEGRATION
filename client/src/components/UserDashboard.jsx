@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import UserSidebar from "./Sidebar/UserSidebar";
 import "./components-css/UserDashboard.css";
 import { List } from "react-bootstrap-icons";
+import StepsPanel from "./StepsPanel/StepsPanel";
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -78,6 +79,8 @@ function UserDashboard() {
               ))}
             </tbody>
           </table>
+          {/* Steps Panel mao ning right side */}
+          <StepsPanel />
         </div>
       </div>
     </div>
