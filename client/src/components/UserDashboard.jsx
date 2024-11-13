@@ -46,7 +46,7 @@ function UserDashboard() {
         style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
-          <List size={24} />
+          <List size={10} />
         </button>
         <div>
           <h1>User Dashboard</h1>
