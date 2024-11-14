@@ -4,7 +4,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
+import UserDocuments from "./components/User/UserDocuments";
+import RequestHistory from "./components/User/RequestHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Notifications from "./components/User/Notifications";
+import RequestsDocument from "./components/Admin/RequestsDocument";
+import Account from "./components/Admin/Account";
+import Users from "./components/Admin/Users";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -21,10 +27,58 @@ function App() {
         }
       />
       <Route
+        path="/requests-document"
+        element={
+          <ProtectedRoute role="admin">
+            <RequestsDocument />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute role="admin">
+            <Account />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/displayUsers"
+        element={
+          <ProtectedRoute role="admin">
+            <Users />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/user"
         element={
           <ProtectedRoute role="user">
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoute role="user">
+            <UserDocuments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/request-history"
+        element={
+          <ProtectedRoute role="user">
+            <RequestHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute role="user">
+            <Notifications />
           </ProtectedRoute>
         }
       />

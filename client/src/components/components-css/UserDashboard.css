@@ -1,7 +1,6 @@
 .user-dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: #f5f5f5;
 }
 
 .user-dashboard-content {
@@ -24,7 +23,6 @@
 /* Sidebar CSS */
 .sidebar {
   width: 250px;
-  background-color: white;
   color: black;
   padding: 20px;
   transition: transform 0.3s ease;

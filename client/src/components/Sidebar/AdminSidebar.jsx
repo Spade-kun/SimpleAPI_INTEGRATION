@@ -8,6 +8,8 @@ import {
   GearFill,
   People,
   BoxArrowRight,
+  PersonCircle,
+  PersonGear,
 } from "react-bootstrap-icons";
 import "./../components-css/AdminSidebar.css";
 
@@ -58,7 +60,25 @@ function AdminSidebar({ isOpen }) {
         <ListGroup.Item as={Link} to="/admin" className="sidebar-item" action>
           <Speedometer2 className="me-3" /> Dashboard
         </ListGroup.Item>
-        {/* Other links */}
+        <ListGroup.Item
+          as={Link}
+          to="/requests-document"
+          className="sidebar-item"
+          action
+        >
+          <FileEarmark className="me-3" /> Document Request
+        </ListGroup.Item>
+        <ListGroup.Item as={Link} to="/account" className="sidebar-item" action>
+          <PersonGear className="me-3" /> Account
+        </ListGroup.Item>
+        <ListGroup.Item
+          as={Link}
+          to="/displayUsers"
+          className="sidebar-item"
+          action
+        >
+          <People className="me-3" /> Users
+        </ListGroup.Item>
       </ListGroup>
 
       {/* Logout Button */}
