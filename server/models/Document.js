@@ -6,6 +6,9 @@ const documentSchema = new mongoose.Schema(
         title: { type: String, required: true },
         content: { type: String, required: true },
         department: { type: String, required: true }, // Department field
+        email: { type: String, required: true },
+        status: { type: String, required: true, default: 'Pending' },
+        createdAt: { type: Date, default: Date.now }
     },
     {
         timestamps: true, // Mongoose will handle createdAt and updatedAt automatically

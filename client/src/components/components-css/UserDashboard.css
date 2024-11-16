@@ -10,6 +10,7 @@
   display: flex;
   margin-right: 300px;
 }
+
 /* Main content area */
 .main-content {
   flex: 1;
@@ -17,7 +18,8 @@
 }
 
 .sidebar.open {
-  width: 250px; /* Adjust width as desired */
+  width: 250px;
+  /* Adjust width as desired */
 }
 
 /* Sidebar CSS */
@@ -39,6 +41,7 @@
 .toggle-sidebar-btn {
   margin-bottom: 20px;
 }
+
 .hamburger-icon {
   position: fixed;
   top: 20px;
@@ -51,6 +54,7 @@
   padding: 10px;
   border-radius: 4px;
 }
+
 @media screen and (max-width: 1200px) {
   .steps-panel {
     width: 250px;
@@ -63,7 +67,8 @@
 
 @media screen and (max-width: 768px) {
   .steps-panel {
-    display: none; /* Hide steps panel on mobile */
+    display: none;
+    /* Hide steps panel on mobile */
   }
 
   .user-dashboard-content {
@@ -101,6 +106,7 @@
 .user-data-table tr:hover {
   background-color: #f1f1f1;
 }
+
 /* Steps Panel (Right Sidebar) Styles */
 .steps-panel {
   width: 300px;
@@ -121,6 +127,136 @@
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
 }
+
 .steps-panel h3 {
   color: white;
+}
+
+/* Add these styles to adjust the modal position */
+.modal-dialog {
+  margin-top: 100px !important;
+  /* Adjust this value as needed */
+}
+
+/* If you want to make it even more specific */
+.modal.show .modal-dialog {
+  margin-top: 300px !important;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+/* Form styles */
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+form button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+form button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+  min-width: 50px;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Disable buttons when needed */
+.edit-btn:disabled,
+.delete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.department-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.department-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Optional: Adjust the table row height if needed */
+.rdt_TableRow {
+  min-height: 40px;
 }
