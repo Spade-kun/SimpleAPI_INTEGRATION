@@ -24,6 +24,7 @@ function AdminSidebar({ isOpen }) {
     sessionStorage.removeItem("sessionToken");
     sessionStorage.removeItem("userInfo");
     sessionStorage.removeItem("googlePicture");
+    sessionStorage.removeItem("refreshToken");
     navigate("/login");
   };
 

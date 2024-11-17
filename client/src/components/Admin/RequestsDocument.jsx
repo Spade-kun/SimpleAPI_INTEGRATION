@@ -1,13 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "../Sidebar/AdminSidebar";
-import { List } from "react-bootstrap-icons";
+import { List, Check2Circle, XCircle } from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
+import axios from "axios";
+import "../components-css/RequestDocument.css";
+
 
 function RequestsDocument() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Define columns for DataTable
+  const columns = [
+    {
+      name: "Document ID",
+      selector: row => row.docID,
+      sortable: true,
+    },
+    {
+      name: "Title",
+      selector: row => row.title,
+      sortable: true,
+    },
+    {
+      name: "Department",
+      selector: row => row.department,
+      sortable: true,
+    },
+    {
+      name: "Requested By",
+      selector: row => row.email,
+      sortable: true,
+    },
+    {
+      name: "Status",
+      selector: row => row.status,
+      sortable: true,
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div className="action-buttons">
+          <button
+            className="btn btn-success btn-sm mx-1"
+            onClick={() => handleApprove(row.docID)}
+            disabled={row.status !== 'Pending'}
+          >
+            <Check2Circle size={16} /> Approve
+          </button>
+          <button
+            className="btn btn-danger btn-sm mx-1"
+            onClick={() => handleReject(row.docID)}
+            disabled={row.status !== 'Pending'}
+          >
+            <XCircle size={16} /> Reject
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    }
+  ];
+
+  // Fetch documents from the server
+  const fetchDocuments = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3000/documents/');
+      setDocuments(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleApprove = async (docID) => {
+    try {
+      await axios.put(`http://localhost:3000/documents/${docID}/approve`);
+      // Refresh the documents list
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error approving document:', error);
+    }
+  };
+
+  const handleReject = async (docID) => {
+    try {
+      await axios.put(`http://localhost:3000/documents/${docID}/reject`);
+      // Refresh the documents list
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error rejecting document:', error);
+    }
   };
 
   return (
@@ -22,11 +117,17 @@ function RequestsDocument() {
         </button>
         <div className="main-content">
           <h1>Requests Document</h1>
-          <p>View and manage your requests document here.</p>
-
-          {/* Add your requests document content here */}
           <div className="requests-document-section">
-            {/* Your requests document table or list */}
+            <DataTable
+              title="Document Requests"
+              columns={columns}
+              data={documents}
+              pagination
+              progressPending={loading}
+              responsive
+              striped
+              highlightOnHover
+            />
           </div>
         </div>
       </div>

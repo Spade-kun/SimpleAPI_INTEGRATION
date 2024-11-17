@@ -26,10 +26,9 @@ function Login() {
       .then((response) => response.json())
       .then((data) => {
         if (data.message === "Login successful") {
-          // Store the session token in sessionStorage
+          // Store the tokens and user info in sessionStorage
           sessionStorage.setItem("sessionToken", data.token);
-
-          // Store user information in sessionStorage
+          sessionStorage.setItem("refreshToken", data.refreshToken);
           sessionStorage.setItem("userInfo", JSON.stringify(data.user));
           sessionStorage.setItem("googlePicture", data.user.picture);
 
