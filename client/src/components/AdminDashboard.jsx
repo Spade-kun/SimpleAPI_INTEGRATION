@@ -8,6 +8,7 @@ import { List } from "react-bootstrap-icons";
 import AdminSidebar from "./Sidebar/AdminSidebar";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -16,6 +17,7 @@ function AdminDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -40,27 +42,26 @@ function AdminDashboard() {
 
   useEffect(() => {
     const userInfo = sessionStorage.getItem("userInfo");
-    if (userInfo) {
+    const welcomeShown = localStorage.getItem("welcomeShown");
+    
+    if (userInfo && welcomeShown !== "true") {
       const user = JSON.parse(userInfo);
-      // Show welcome toast for admin
-      toast.success(`Welcome Admin ${user.name}! 👋`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
+      Swal.fire({
+        icon: 'success',
+        title: `Welcome Admin ${user.name}! 👋`,
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#fff',
+        customClass: {
+          popup: 'animated fadeInDown'
+        }
       });
+      // Set the flag in localStorage
+      localStorage.setItem("welcomeShown", "true");
     }
     fetchUsers();
   }, []);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("sessionToken");
-    navigate("/login");
-  };
 
   const handleEditUser = (user) => {
     setEditUser(user);
@@ -69,25 +70,74 @@ function AdminDashboard() {
 
   const confirmEditUser = async () => {
     try {
-      await axios.patch(
-        `http://localhost:3000/users/${editUser.userID}`,
-        editUser
-      );
-      fetchUsers(); // Fetch updated list after edit
+      await axios.patch(`http://localhost:3000/users/${editUser.userID}`, editUser);
+      fetchUsers();
       setIsEditModalOpen(false);
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'User updated successfully!',
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#fff',
+        customClass: {
+          popup: 'animated fadeInDown'
+        }
+      });
     } catch (error) {
       console.error("Error updating user:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to update user.',
+        background: '#fff'
+      });
     }
   };
 
-  const handleDeleteUser = async (userID) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await axios.delete(`http://localhost:3000/users/${userID}`);
-        fetchUsers(); // Fetch updated list after deletion
-      } catch (error) {
-        console.error("Error deleting user:", error);
+  const handleDeleteUser = (userID) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      background: '#fff',
+      customClass: {
+        popup: 'animated fadeInDown'
       }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        confirmDelete(userID);
+      }
+    });
+  };
+
+  const confirmDelete = async (userID) => {
+    try {
+      await axios.delete(`http://localhost:3000/users/${userID}`);
+      fetchUsers();
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'User has been deleted.',
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#fff',
+        customClass: {
+          popup: 'animated fadeInDown'
+        }
+      });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to delete user.',
+        background: '#fff'
+      });
     }
   };
 
@@ -98,11 +148,39 @@ function AdminDashboard() {
 
   const confirmAddUser = async () => {
     try {
+      // Show loading state
+      Swal.fire({
+        title: 'Adding User',
+        text: 'Please wait...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       await axios.post("http://localhost:3000/users/register", newUser);
-      fetchUsers(); // Fetch updated list after adding user
-      setIsAddModalOpen(false); // Close modal after adding user
+      fetchUsers();
+      setIsAddModalOpen(false);
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'New user added successfully!',
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#fff',
+        customClass: {
+          popup: 'animated fadeInDown'
+        }
+      });
     } catch (error) {
       console.error("Error adding user:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to add new user.',
+        background: '#fff'
+      });
     }
   };
 
@@ -140,7 +218,7 @@ function AdminDashboard() {
       
       {/* Hamburger Icon */}
       <button className="hamburger-icon" onClick={toggleSidebar}>
-        <List size={10} />
+        <List size={24} />
       </button>
 
       {/* Sidebar */}
@@ -168,7 +246,6 @@ function AdminDashboard() {
 
         <div className="table-container">
           <DataTable
-            title="Users List"
             columns={columns}
             data={users.filter((user) =>
               user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -176,6 +253,8 @@ function AdminDashboard() {
             pagination
             highlightOnHover
             striped
+            fixedHeader
+            fixedHeaderScrollHeight="calc(100vh - 350px)"
           />
         </div>
 

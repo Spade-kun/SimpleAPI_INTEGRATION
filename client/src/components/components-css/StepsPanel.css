@@ -1,10 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Allura&family=Merienda:wght@300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 h3 {
-  font-family: "Montserrat", sans-serif;
+  font-family: "Montserrat", sans-serif; 
   font-weight: bolder;
-  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.9);
-  color: white;
+  color: #2c3e50 !important;
+  text-shadow: none;
 }
 h5 {
   font-family: "Montserrat", sans-serif;
@@ -19,39 +19,44 @@ p {
 .steps-panel {
   width: 300px;
   height: 100vh;
-  background-color: #36454F;
+  background-color: #ffffff;
   padding: 20px;
   position: fixed;
   right: 0;
   top: 0;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   z-index: 1000;
-  color: white;
-  backdrop-filter: blur(8px);
+  color: #2c3e50;
 }
 
 .step-card {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border: none !important;
-  backdrop-filter: blur(10px);
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
   margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .step-card h5 {
-  color: white;
+  color: #2c3e50;
   margin-bottom: 5px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .step-card p {
-  color: white;
+  color: #4a5568;
   margin-bottom: 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .step-card .text-primary {
-  color: #ffa494 !important;
+  color: #4a90e2 !important;
 }
 
 /* Responsive handling */

@@ -101,22 +101,61 @@ app.post("/login/google", async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
-    // Generate a JWT token with a 1-hour expiration time
+    // Generate access token (1 hour expiration)
     const sessionToken = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
+    // Generate refresh token (7 days expiration)
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.json({
       message: "Login successful",
       user: { name: user.name, email: user.email, role: user.role, picture: user.picture },
       token: sessionToken,
+      refreshToken: refreshToken,
     });
     console.log("User found:", user);
   } catch (error) {
     console.error("Error verifying Google token:", error);
     res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+// Add new endpoint to refresh the token
+app.post("/refresh-token", async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Generate new access token
+    const newSessionToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      token: newSessionToken,
+    });
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 });
 

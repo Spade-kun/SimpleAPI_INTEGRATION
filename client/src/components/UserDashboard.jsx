@@ -10,6 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faBan } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 Modal.setAppElement("#root"); // For accessibility
 
@@ -53,6 +54,7 @@ function UserDashboard() {
   useEffect(() => {
     const token = sessionStorage.getItem("sessionToken");
     const userInfo = sessionStorage.getItem("userInfo");
+    const welcomeShown = sessionStorage.getItem("welcomeShown");
     
     if (!token) {
       navigate("/login");
@@ -60,16 +62,28 @@ function UserDashboard() {
       if (userInfo) {
         const user = JSON.parse(userInfo);
         setUserName(user.name);
-        toast.success(`Welcome ${user.name}! 👋`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        if (welcomeShown !== "true") {
+          Swal.fire({
+            title: `Welcome ${user.name}! 👋`,
+            text: 'We\'re glad to have you back',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#fff',
+            customClass: {
+              popup: 'animated fadeInDown',
+              title: 'swal2-title',
+              content: 'swal2-content',
+              timerProgressBar: 'swal2-timer-progress-bar'
+            },
+            didOpen: (toast) => {
+              toast.addEventListener('mouseenter', Swal.stopTimer);
+              toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+          });
+          sessionStorage.setItem("welcomeShown", "true");
+        }
       }
 
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
@@ -125,18 +139,36 @@ function UserDashboard() {
     e.preventDefault();
     const token = sessionStorage.getItem("sessionToken");
     if (!token) {
-      alert("Please login first");
+      Swal.fire({
+        icon: 'error',
+        title: 'Authentication Error',
+        text: 'Please login first',
+      });
       navigate("/login");
       return;
     }
 
     // Validate form data
     if (!formData.email || !formData.title || !formData.content || !formData.department) {
-      alert("Please fill in all fields");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please fill in all fields',
+      });
       return;
     }
 
     try {
+      // Show loading state
+      Swal.fire({
+        title: 'Submitting Request',
+        text: 'Please wait...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       const response = await fetch("http://localhost:3000/documents/request", {
         method: "POST",
         headers: {
@@ -149,28 +181,53 @@ function UserDashboard() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message || "Document request submitted successfully!");
-        setIsModalOpen(false);
-        setFormData({
-          email: "",
-          title: "",
-          content: "",
-          department: "",
-          status: "Pending"
+        // Close loading state and show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Document request submitted successfully!',
+          showConfirmButton: true,
+          timer: 3000,
+          timerProgressBar: true,
+        }).then(() => {
+          setIsModalOpen(false);
+          setFormData({
+            email: "",
+            title: "",
+            content: "",
+            department: "",
+            status: "Pending"
+          });
+          fetchDocuments();
         });
-        fetchDocuments();
       } else {
         throw new Error(data.message || 'Failed to submit request');
       }
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "Failed to submit request. Please try again.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: error.message || "Failed to submit request. Please try again.",
+      });
     }
   };
 
   const handleEdit = (docID, document) => {
-    setEditingDocument(document);
-    setIsEditModalOpen(true);
+    Swal.fire({
+      title: 'Edit Document',
+      text: 'Are you sure you want to edit this document?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, edit it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setEditingDocument(document);
+        setIsEditModalOpen(true);
+      }
+    });
   };
 
   const handleEditSubmit = async (e) => {
@@ -191,45 +248,78 @@ function UserDashboard() {
       );
 
       if (response.ok) {
-        alert("Document updated successfully!");
         setIsEditModalOpen(false);
         setEditingDocument(null);
         fetchDocuments();
+        Swal.fire(
+          'Updated!',
+          'Document has been updated successfully.',
+          'success'
+        );
       } else {
         const error = await response.json();
-        alert(error.message || "Failed to update document");
+        Swal.fire(
+          'Error!',
+          error.message || 'Failed to update document',
+          'error'
+        );
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to update document");
+      Swal.fire(
+        'Error!',
+        'Failed to update document',
+        'error'
+      );
     }
   };
 
   const handleDelete = async (docID) => {
-    if (!window.confirm("Are you sure you want to delete this document?")) {
-      return;
-    }
+    Swal.fire({
+      title: 'Cancel Document',
+      text: 'Are you sure you want to cancel this document request?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, cancel it!',
+      cancelButtonText: 'No, keep it'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const token = sessionStorage.getItem("sessionToken");
+        try {
+          const response = await fetch(`http://localhost:3000/documents/${docID}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-    const token = sessionStorage.getItem("sessionToken");
-    try {
-      const response = await fetch(`http://localhost:3000/documents/${docID}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        alert("Document deleted successfully!");
-        fetchDocuments(); // Refresh the table
-      } else {
-        const error = await response.json();
-        alert(error.message || "Failed to delete document");
+          if (response.ok) {
+            Swal.fire(
+              'Cancelled!',
+              'Your document request has been cancelled.',
+              'success'
+            );
+            fetchDocuments();
+          } else {
+            const error = await response.json();
+            Swal.fire(
+              'Error!',
+              error.message || 'Failed to cancel document',
+              'error'
+            );
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire(
+            'Error!',
+            'Failed to cancel document',
+            'error'
+          );
+        }
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to delete document");
-    }
+    });
   };
 
   const columns = [
@@ -482,13 +572,17 @@ function UserDashboard() {
           </Modal>
 
           <h2>Documents</h2>
-          <DataTable
-            columns={columns}
-            data={documents}
-            pagination
-            highlightOnHover
-            striped
-          />
+          <div className="documents-table-container">
+            <DataTable
+              columns={columns}
+              data={documents}
+              pagination
+              highlightOnHover
+              striped
+              fixedHeader
+              fixedHeaderScrollHeight="calc(100vh - 350px)"
+            />
+          </div>
           <StepsPanel />
         </div>
       </div>

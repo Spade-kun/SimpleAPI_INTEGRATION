@@ -3,14 +3,14 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 .user-dashboard-content {
   flex: 1;
   height: 100vh;
-  overflow-y: auto;
-  background-color: #FEBAAD;
+  overflow: hidden;
+  background-color: #f5f7fa;
   transition: margin-left 0.3s ease;
   padding: 20px;
   margin-right: 300px;
@@ -22,14 +22,14 @@
 
 .user-dashboard-content.without-sidebar {
   margin-left: 60px;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 /* Main content area */
 .main-content {
   flex: 1;
   padding-right: 20px;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 .sidebar.open {
@@ -100,7 +100,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 .user-data-table th,
@@ -111,7 +111,7 @@
 }
 
 .user-data-table th {
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
   font-weight: bold;
 }
 
@@ -301,17 +301,22 @@ form button[type="button"] {
 
 /* Update table container styles */
 .table-container {
-  background: #FEBAAD;
+  height: calc(100vh - 250px);
+  overflow: hidden;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-top: 20px;
-  width: 100%;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
 }
 
 .custom-btn {
-  background-color: #181A2F;
+  background-color: #4a90e2;
   color: white;
+  transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+  background-color: #357abd;
 }
 
 /* Responsive styles */
@@ -327,31 +332,38 @@ form button[type="button"] {
 
 /* Update DataTable customization */
 .rdt_Table {
-  background: #FEBAAD !important;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.rdt_TableBody {
+  height: calc(100% - 100px) !important;
+  overflow-y: auto !important;
 }
 
 .rdt_TableHead {
-  background-color: #FEBAAD !important;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
 }
 
 .rdt_TableHeadRow {
-  background-color: #FEBAAD !important;
+  background-color: #4a90e2 !important;
+  color: white !important;
 }
 
 .rdt_TableHeader {
-  background-color: #FEBAAD !important;
   padding: 15px !important;
+  font-size: large;
 }
 
 .rdt_TableCell {
-  background-color: #FEBAAD !important;
+  background-color: transparent !important;
   padding: 12px 15px !important;
 }
 
 .rdt_TableRow {
-  background-color: #FEBAAD !important;
+  background-color: #ffffff !important;
 }
 
 .rdt_TableFooter {
@@ -359,11 +371,11 @@ form button[type="button"] {
 }
 
 .rdt_Pagination {
-  background-color: #FEBAAD !important;
+  background-color: #ffffff !important;
 }
 
 .rdt_TableRow:hover {
-  background-color: #ffa494 !important;
+  background-color: #f0f4f8 !important;
 }
 
 /* Update main container and content area */
@@ -372,14 +384,14 @@ form button[type="button"] {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 .user-dashboard-content {
   flex: 1;
   height: 100vh;
-  overflow-y: auto;
-  background-color: #FEBAAD;
+  overflow: hidden;
+  background-color: #f5f7fa;
   transition: margin-left 0.3s ease;
   padding: 20px;
   margin-right: 300px;
@@ -389,13 +401,13 @@ form button[type="button"] {
 .main-content {
   flex: 1;
   padding-right: 20px;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 /* Ensure background color persists when sidebar is closed */
 .user-dashboard-content.without-sidebar {
   margin-left: 60px;
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
 }
 
 /* Update any headers or text containers */
@@ -412,5 +424,221 @@ h2 {
 
 /* Update any other white backgrounds */
 .content-wrapper {
-  background-color: #FEBAAD;
+  background-color: #f5f7fa;
+}
+
+/* Additional SweetAlert2 custom styles */
+.swal2-popup {
+  padding: 1em;
+}
+
+.swal2-icon {
+  margin: 1em auto;
+}
+
+.swal2-title {
+  margin: 0 0 0.5em;
+}
+
+.swal2-timer-progress-bar {
+  background: #4a90e2;
+}
+
+/* Loading animation styles */
+.swal2-loading {
+  overflow: hidden;
+}
+
+.swal2-loader {
+  border-color: #4a90e2 transparent #4a90e2 transparent;
+}
+
+/* Success animation styles */
+.swal2-success {
+  border-color: #a5dc86;
+}
+
+.swal2-success-circular-line-left,
+.swal2-success-circular-line-right,
+.swal2-success-fix {
+  background-color: transparent !important;
+}
+
+/* Error animation styles */
+.swal2-error {
+  border-color: #f27474;
+}
+
+/* SweetAlert2 custom styles */
+.swal2-popup {
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+  padding: 2em !important;
+}
+
+.swal2-title {
+  font-size: 1.6rem !important;
+  color: #333 !important;
+  margin-bottom: 0.5em !important;
+}
+
+.swal2-html-container {
+  font-size: 1.1rem !important;
+  color: #666 !important;
+}
+
+.swal2-timer-progress-bar {
+  background: #4a90e2 !important;
+  height: 0.25em !important;
+}
+
+/* Animation for the popup */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animated {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+
+.fadeInDown {
+  animation-name: fadeInDown;
+}
+
+/* Success styles */
+.swal2-icon.swal2-success {
+  border-color: #a5dc86 !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #a5dc86 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: #a5dc86 !important;
+}
+
+/* Custom scrollbar styles */
+.rdt_TableBody::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+}
+
+.rdt_TableBody::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #FEBAAD, #FFA494);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #FFA494, #FF8C7C);
+  cursor: pointer;
+}
+
+.rdt_TableBody::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+.rdt_TableBody {
+  scrollbar-width: thin;
+  scrollbar-color: #FEBAAD transparent;
+}
+
+/* Ensure smooth scrolling */
+.rdt_TableBody {
+  scroll-behavior: smooth;
+}
+
+/* Add a subtle fade effect to table edges */
+.table-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* User Dashboard Table Styles */
+.user-dashboard-content .table-container {
+  margin: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: calc(100vh - 300px);
+  overflow: hidden;
+}
+
+.user-dashboard-content .rdt_Table {
+  height: 100%;
+}
+
+.user-dashboard-content .rdt_TableHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+}
+
+.user-dashboard-content .rdt_TableBody {
+  height: calc(100% - 100px) !important;
+  overflow-y: auto !important;
+  padding-right: 3px;
+}
+
+/* User Table Scrollbar */
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, rgba(254, 186, 173, 0.8), rgba(255, 164, 148, 0.9));
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, rgba(255, 164, 148, 0.9), rgba(255, 140, 124, 1));
+  border: 2px solid transparent;
 }

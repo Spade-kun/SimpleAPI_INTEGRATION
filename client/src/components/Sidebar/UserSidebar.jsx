@@ -11,6 +11,7 @@ import {
   Bell,
   BoxArrowRight,
 } from "react-bootstrap-icons";
+import Swal from 'sweetalert2';
 import "./../components-css/AdminSidebar.css";
 
 function UserSidebar({ isOpen }) {
@@ -21,10 +22,40 @@ function UserSidebar({ isOpen }) {
   const googlePicture = sessionStorage.getItem("googlePicture");
 
   const handleLogout = () => {
-    sessionStorage.removeItem("sessionToken");
-    sessionStorage.removeItem("userInfo");
-    sessionStorage.removeItem("googlePicture");
-    navigate("/login");
+    Swal.fire({
+      title: 'Logout',
+      text: 'Are you sure you want to logout?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, logout!',
+      background: '#fff',
+      customClass: {
+        popup: 'animated fadeInDown'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Clear all session data first
+        sessionStorage.clear();
+        
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'Logged Out!',
+          text: 'You have been successfully logged out.',
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#fff',
+          customClass: {
+            popup: 'animated fadeInDown'
+          }
+        }).then(() => {
+          // Force page reload and redirect
+          window.location.href = "/login";
+        });
+      }
+    });
   };
 
   return (
