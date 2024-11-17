@@ -6,6 +6,8 @@ import Modal from "react-modal";
 import "./components-css/AdminDashboard.css";
 import { List } from "react-bootstrap-icons";
 import AdminSidebar from "./Sidebar/AdminSidebar";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -37,7 +39,22 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchUsers(); // Initial fetch of users
+    const userInfo = sessionStorage.getItem("userInfo");
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      // Show welcome toast for admin
+      toast.success(`Welcome Admin ${user.name}! 👋`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+    fetchUsers();
   }, []);
 
   const handleLogout = () => {
@@ -99,8 +116,8 @@ function AdminDashboard() {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button onClick={() => handleEditUser(row)}>Edit</button>
-          <button onClick={() => handleDeleteUser(row.userID)}>Delete</button>
+          <button onClick={() => handleEditUser(row)} className="custom-btn2">Edit</button>
+          <button onClick={() => handleDeleteUser(row.userID)} className="custom-btn1">Delete</button>
         </div>
       ),
     },
@@ -108,6 +125,19 @@ function AdminDashboard() {
 
   return (
     <div className="admin-layout">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      
       {/* Hamburger Icon */}
       <button className="hamburger-icon" onClick={toggleSidebar}>
         <List size={10} />
@@ -126,7 +156,7 @@ function AdminDashboard() {
         </div>
 
         <div className="admin-controls">
-          <button onClick={handleAddUser}>Add User</button>
+          <button onClick={handleAddUser} className="custom-btn">Add User</button>
           <input
             type="text"
             placeholder="Search by Email"
@@ -134,12 +164,6 @@ function AdminDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button
-            className="logout logout-button logout-"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
         </div>
 
         <div className="table-container">
@@ -197,8 +221,8 @@ function AdminDashboard() {
                 }
               />
               <div className="modal-buttons">
-                <button onClick={confirmEditUser}>Confirm</button>
-                <button onClick={() => setIsEditModalOpen(false)}>
+                <button onClick={confirmEditUser} className="custom-btn">Confirm</button>
+                <button onClick={() => setIsEditModalOpen(false)} className="custom-btn1">
                   Cancel
                 </button>
               </div>
@@ -248,8 +272,8 @@ function AdminDashboard() {
                 }
               />
               <div className="modal-buttons">
-                <button onClick={confirmAddUser}>Confirm</button>
-                <button onClick={() => setIsAddModalOpen(false)}>Cancel</button>
+                <button onClick={confirmAddUser}  className="custom-btn">Confirm</button>
+                <button onClick={() => setIsAddModalOpen(false)}  className="custom-btn1">Cancel</button>
               </div>
             </div>
           </Modal>

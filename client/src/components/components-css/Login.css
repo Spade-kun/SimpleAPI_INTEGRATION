@@ -9,46 +9,58 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Arial, sans-serif;
-  background-color: #f0f2f5;
 }
 
 .login-page {
   display: flex;
+  position: relative;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
+  background-image: url('../../assets/bg.svg');
+  background-size: cover;
+  background-position: center;
 }
 
 .left-section {
-  flex: 1;
+  width: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: url("../../assets/bg.svg");
-  background-size: cover;
-  background-position: center;
+  text-align: center;
   padding: 20px;
   color: white;
-  text-align: center;
-  border-radius: 10px;
+  z-index: 1;
+}
+
+.right-section {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  position: relative;
+  border-top-left-radius: 250px;
+  border-bottom-right-radius: 250px;
+  border-top-right-radius: 100px;
+  border-bottom-left-radius: 100px;
+
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
 }
 
 .buksu-logo {
-  width: 150px; /* Adjust width as needed */
-  margin-top: 20px;
+  width: 150px;
+  margin-top: 75px;
 }
 
 .qa-logo {
-  width: 300px; /* Adjust width as needed */
-  margin-top: 20px;
+  width: 300px;
+  margin-top: 75px;
 }
 
 .left-section h2 {
@@ -77,10 +89,12 @@ html {
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 1.2rem;
+  z-index: 2;
 }
 
 .login-card h3 {
@@ -91,9 +105,29 @@ html {
 .login-card .g-recaptcha {
   display: flex;
   justify-content: center;
-  margin: 20px auto; /* Adds some vertical spacing and centers horizontally */
+  margin: 20px auto;
 }
-/* Add this to handle the reCAPTCHA iframe alignment */
+
 .login-card .g-recaptcha > div {
   margin: 0 auto;
 }
+
+.login-txt {
+  font-family: "Montserrat", sans-serif;
+  font-style: italic;
+  font-weight: bolder;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.9);
+}
+.login-txt1 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+.login-txt2 {
+  font-family: "Montserrat", sans-serif;
+  font-style: italic;
+}
+.google-login {
+  width: 85%;
+}
+

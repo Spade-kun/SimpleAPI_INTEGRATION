@@ -1,20 +1,35 @@
 .user-dashboard-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #FEBAAD;
 }
 
 .user-dashboard-content {
   flex: 1;
-  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #FEBAAD;
   transition: margin-left 0.3s ease;
-  display: flex;
+  padding: 20px;
   margin-right: 300px;
+}
+
+.user-dashboard-content.with-sidebar {
+  margin-left: 250px;
+}
+
+.user-dashboard-content.without-sidebar {
+  margin-left: 60px;
+  background-color: #FEBAAD;
 }
 
 /* Main content area */
 .main-content {
   flex: 1;
   padding-right: 20px;
+  background-color: #FEBAAD;
 }
 
 .sidebar.open {
@@ -49,7 +64,7 @@
   z-index: 1001;
   background: transparent;
   border: none;
-  color: #333;
+  color: #000000;
   cursor: pointer;
   padding: 10px;
   border-radius: 4px;
@@ -85,6 +100,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  background-color: #FEBAAD;
 }
 
 .user-data-table th,
@@ -95,30 +111,31 @@
 }
 
 .user-data-table th {
-  background-color: #f4f4f4;
+  background-color: #FEBAAD;
   font-weight: bold;
 }
 
 .user-data-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: #ffa494;
 }
 
 .user-data-table tr:hover {
-  background-color: #f1f1f1;
+  background-color: #ff9485;
 }
 
 /* Steps Panel (Right Sidebar) Styles */
 .steps-panel {
   width: 300px;
-  min-width: 300px;
   height: 100vh;
-  background-color: blue;
+  background-color: #fff;
   padding: 20px;
   position: fixed;
   right: 0;
   top: 0;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  z-index: 1000;
+  border-left: 1px solid #eee;
 }
 
 .steps-panel h2 {
@@ -202,43 +219,59 @@ form button[type="button"] {
 
 .action-buttons {
   display: flex;
-  gap: 4px;
+  gap: 5px;
+  justify-content: center;
 }
 
-.edit-btn,
-.delete-btn {
-  padding: 4px 8px;
+.icon-button {
+  background: none;
   border: none;
-  border-radius: 3px;
   cursor: pointer;
+  padding: 6px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button.edit-btn {
+  color: #007bff;
+}
+
+.icon-button.edit-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
+.icon-button.delete-btn {
+  color: #dc3545;
+}
+
+.icon-button.delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+/* Optional: Add tooltip styles */
+.icon-button {
+  position: relative;
+}
+
+.icon-button:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
   font-size: 12px;
-  transition: background-color 0.3s;
-  min-width: 50px;
-}
-
-.edit-btn {
-  background-color: #007bff;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #0056b3;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-/* Disable buttons when needed */
-.edit-btn:disabled,
-.delete-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  margin-bottom: 4px;
 }
 
 .department-select {
@@ -259,4 +292,125 @@ form button[type="button"] {
 /* Optional: Adjust the table row height if needed */
 .rdt_TableRow {
   min-height: 40px;
+}
+
+.MuiAlert-root {
+  margin: 16px;
+  max-width: 800px;
+}
+
+/* Update table container styles */
+.table-container {
+  background: #FEBAAD;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.custom-btn {
+  background-color: #181A2F;
+  color: white;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .user-dashboard-content.with-sidebar {
+    margin-left: 0;
+  }
+
+  .user-dashboard-content.without-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* Update DataTable customization */
+.rdt_Table {
+  background: #FEBAAD !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rdt_TableHead {
+  background-color: #FEBAAD !important;
+}
+
+.rdt_TableHeadRow {
+  background-color: #FEBAAD !important;
+}
+
+.rdt_TableHeader {
+  background-color: #FEBAAD !important;
+  padding: 15px !important;
+}
+
+.rdt_TableCell {
+  background-color: #FEBAAD !important;
+  padding: 12px 15px !important;
+}
+
+.rdt_TableRow {
+  background-color: #FEBAAD !important;
+}
+
+.rdt_TableFooter {
+  background-color: #FEBAAD !important;
+}
+
+.rdt_Pagination {
+  background-color: #FEBAAD !important;
+}
+
+.rdt_TableRow:hover {
+  background-color: #ffa494 !important;
+}
+
+/* Update main container and content area */
+.user-dashboard-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #FEBAAD;
+}
+
+.user-dashboard-content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #FEBAAD;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+  margin-right: 300px;
+}
+
+/* Update main content area */
+.main-content {
+  flex: 1;
+  padding-right: 20px;
+  background-color: #FEBAAD;
+}
+
+/* Ensure background color persists when sidebar is closed */
+.user-dashboard-content.without-sidebar {
+  margin-left: 60px;
+  background-color: #FEBAAD;
+}
+
+/* Update any headers or text containers */
+h2 {
+  color: black;
+}
+
+/* Update search input if present */
+.search-input {
+  background-color: white;
+  color: black;
+  border: 1px solid #ddd;
+}
+
+/* Update any other white backgrounds */
+.content-wrapper {
+  background-color: #FEBAAD;
 }

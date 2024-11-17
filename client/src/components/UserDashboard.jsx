@@ -6,6 +6,10 @@ import DataTable from "react-data-table-component";
 import Modal from "react-modal"; // Import Modal
 import "./components-css/UserDashboard.css";
 import StepsPanel from "./StepsPanel/StepsPanel";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPenToSquare, faBan } from '@fortawesome/free-solid-svg-icons';
 
 Modal.setAppElement("#root"); // For accessibility
 
@@ -44,12 +48,30 @@ function UserDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState(null);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem("sessionToken");
+    const userInfo = sessionStorage.getItem("userInfo");
+    
     if (!token) {
       navigate("/login");
     } else {
+      if (userInfo) {
+        const user = JSON.parse(userInfo);
+        setUserName(user.name);
+        toast.success(`Welcome ${user.name}! 👋`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const currentTime = Math.floor(Date.now() / 1000);
       if (decodedToken.exp < currentTime) {
@@ -222,16 +244,18 @@ function UserDashboard() {
       cell: (row) => (
         <div className="action-buttons">
           <button
-            className="edit-btn"
+            className="icon-button edit-btn"
             onClick={() => handleEdit(row.docID, row)}
+            title="Edit"
           >
-            Edit
+            <FontAwesomeIcon icon={faPenToSquare} />
           </button>
           <button
-            className="delete-btn"
+            className="icon-button delete-btn"
             onClick={() => handleDelete(row.docID)}
+            title="Cancel"
           >
-            Cancel
+            <FontAwesomeIcon icon={faBan} />
           </button>
         </div>
       ),
@@ -281,13 +305,26 @@ function UserDashboard() {
 
   return (
     <div className="user-dashboard-container">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className="user-dashboard-content"
-        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
+        className={`user-dashboard-content ${
+          isSidebarOpen ? "with-sidebar" : "without-sidebar"
+        }`}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
-          <List size={10} />
+          <List size={20} />
         </button>
         <div>
           <p style={{ opacity: 0.7 }}>
@@ -298,7 +335,7 @@ function UserDashboard() {
           <p>
             <i>Welcome! Here you can view and manage your document requests.</i>
           </p>
-          <button onClick={handleOpenModal}>Request Document</button>
+          <button onClick={handleOpenModal} className="custom-btn">Request Document</button>
 
           {/* Modal for document request */}
           <Modal
