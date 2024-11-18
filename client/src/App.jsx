@@ -11,6 +11,7 @@ import Notifications from "./components/User/Notifications";
 import RequestsDocument from "./components/Admin/RequestsDocument";
 import Account from "./components/Admin/Account";
 import Users from "./components/Admin/Users";
+import ArchiveDocuments from "./components/User/ArchiveDocuments";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -63,6 +64,14 @@ function App() {
         element={
           <ProtectedRoute role="user">
             <UserDocuments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/archive-documents"
+        element={
+          <ProtectedRoute role="user">
+            <ArchiveDocuments />
           </ProtectedRoute>
         }
       />

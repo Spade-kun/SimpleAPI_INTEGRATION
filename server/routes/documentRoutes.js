@@ -6,6 +6,9 @@ const {
   searchDocumentsByDocID,
   deleteDocument,
   updateDocument,
+  archiveDocument,
+  getArchivedDocuments,
+  unarchiveDocument,
 } = require("../services/documentService");
 
 const router = express.Router();
@@ -27,5 +30,14 @@ router.delete("/:docID", deleteDocument);
 
 // Update a document by docID
 router.patch("/:docID", updateDocument);
+
+// Archive a document
+router.patch("/archive/:docID", archiveDocument);
+
+// Unarchive a document
+router.patch("/unarchive/:docID", unarchiveDocument);
+
+// Get archived documents
+router.get("/archived", getArchivedDocuments);
 
 module.exports = router;

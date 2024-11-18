@@ -6,9 +6,9 @@ import Modal from "react-modal";
 import "./components-css/AdminDashboard.css";
 import { List } from "react-bootstrap-icons";
 import AdminSidebar from "./Sidebar/AdminSidebar";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Swal from 'sweetalert2';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Swal from "sweetalert2";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -16,7 +16,7 @@ function AdminDashboard() {
   const [editUser, setEditUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [userToDelete, setUserToDelete] = useState(null);
 
   const toggleSidebar = () => {
@@ -43,25 +43,24 @@ function AdminDashboard() {
   useEffect(() => {
     const userInfo = sessionStorage.getItem("userInfo");
     const welcomeShown = localStorage.getItem("welcomeShown");
-    
+
     if (userInfo && welcomeShown !== "true") {
       const user = JSON.parse(userInfo);
       Swal.fire({
-        icon: 'success',
+        icon: "success",
         title: `Welcome Admin ${user.name}! 👋`,
         showConfirmButton: false,
         timer: 1500,
-        background: '#fff',
+        background: "#fff",
         customClass: {
-          popup: 'animated fadeInDown'
-        }
+          popup: "animated fadeInDown",
+        },
       });
       // Set the flag in localStorage
       localStorage.setItem("welcomeShown", "true");
     }
     fetchUsers();
   }, []);
-
 
   const handleEditUser = (user) => {
     setEditUser(user);
@@ -70,44 +69,47 @@ function AdminDashboard() {
 
   const confirmEditUser = async () => {
     try {
-      await axios.patch(`http://localhost:3000/users/${editUser.userID}`, editUser);
+      await axios.patch(
+        `http://localhost:3000/users/${editUser.userID}`,
+        editUser
+      );
       fetchUsers();
       setIsEditModalOpen(false);
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'User updated successfully!',
+        icon: "success",
+        title: "Success!",
+        text: "User updated successfully!",
         timer: 1500,
         showConfirmButton: false,
-        background: '#fff',
+        background: "#fff",
         customClass: {
-          popup: 'animated fadeInDown'
-        }
+          popup: "animated fadeInDown",
+        },
       });
     } catch (error) {
       console.error("Error updating user:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Failed to update user.',
-        background: '#fff'
+        icon: "error",
+        title: "Error!",
+        text: "Failed to update user.",
+        background: "#fff",
       });
     }
   };
 
   const handleDeleteUser = (userID) => {
     Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!',
-      background: '#fff',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      background: "#fff",
       customClass: {
-        popup: 'animated fadeInDown'
-      }
+        popup: "animated fadeInDown",
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         confirmDelete(userID);
@@ -120,23 +122,23 @@ function AdminDashboard() {
       await axios.delete(`http://localhost:3000/users/${userID}`);
       fetchUsers();
       Swal.fire({
-        icon: 'success',
-        title: 'Deleted!',
-        text: 'User has been deleted.',
+        icon: "success",
+        title: "Deleted!",
+        text: "User has been deleted.",
         timer: 1500,
         showConfirmButton: false,
-        background: '#fff',
+        background: "#fff",
         customClass: {
-          popup: 'animated fadeInDown'
-        }
+          popup: "animated fadeInDown",
+        },
       });
     } catch (error) {
       console.error("Error deleting user:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Failed to delete user.',
-        background: '#fff'
+        icon: "error",
+        title: "Error!",
+        text: "Failed to delete user.",
+        background: "#fff",
       });
     }
   };
@@ -150,36 +152,36 @@ function AdminDashboard() {
     try {
       // Show loading state
       Swal.fire({
-        title: 'Adding User',
-        text: 'Please wait...',
+        title: "Adding User",
+        text: "Please wait...",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
 
       await axios.post("http://localhost:3000/users/register", newUser);
       fetchUsers();
       setIsAddModalOpen(false);
-      
+
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'New user added successfully!',
+        icon: "success",
+        title: "Success!",
+        text: "New user added successfully!",
         timer: 1500,
         showConfirmButton: false,
-        background: '#fff',
+        background: "#fff",
         customClass: {
-          popup: 'animated fadeInDown'
-        }
+          popup: "animated fadeInDown",
+        },
       });
     } catch (error) {
       console.error("Error adding user:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Failed to add new user.',
-        background: '#fff'
+        icon: "error",
+        title: "Error!",
+        text: "Failed to add new user.",
+        background: "#fff",
       });
     }
   };
@@ -194,8 +196,15 @@ function AdminDashboard() {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button onClick={() => handleEditUser(row)} className="custom-btn2">Edit</button>
-          <button onClick={() => handleDeleteUser(row.userID)} className="custom-btn1">Delete</button>
+          <button onClick={() => handleEditUser(row)} className="custom-btn2">
+            Edit
+          </button>
+          <button
+            onClick={() => handleDeleteUser(row.userID)}
+            className="custom-btn1"
+          >
+            Delete
+          </button>
         </div>
       ),
     },
@@ -215,7 +224,7 @@ function AdminDashboard() {
         pauseOnHover
         theme="light"
       />
-      
+
       {/* Hamburger Icon */}
       <button className="hamburger-icon" onClick={toggleSidebar}>
         <List size={24} />
@@ -234,7 +243,9 @@ function AdminDashboard() {
         </div>
 
         <div className="admin-controls">
-          <button onClick={handleAddUser} className="custom-btn">Add User</button>
+          <button onClick={handleAddUser} className="custom-btn">
+            Add User
+          </button>
           <input
             type="text"
             placeholder="Search by Email"
@@ -300,8 +311,13 @@ function AdminDashboard() {
                 }
               />
               <div className="modal-buttons">
-                <button onClick={confirmEditUser} className="custom-btn">Confirm</button>
-                <button onClick={() => setIsEditModalOpen(false)} className="custom-btn1">
+                <button onClick={confirmEditUser} className="custom-btn">
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="custom-btn1"
+                >
                   Cancel
                 </button>
               </div>
@@ -351,8 +367,15 @@ function AdminDashboard() {
                 }
               />
               <div className="modal-buttons">
-                <button onClick={confirmAddUser}  className="custom-btn">Confirm</button>
-                <button onClick={() => setIsAddModalOpen(false)}  className="custom-btn1">Cancel</button>
+                <button onClick={confirmAddUser} className="custom-btn">
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="custom-btn1"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </Modal>

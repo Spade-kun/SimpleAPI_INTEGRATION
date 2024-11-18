@@ -9,9 +9,10 @@ import {
   People,
   ClockHistory,
   Bell,
+  Archive,
   BoxArrowRight,
 } from "react-bootstrap-icons";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import "./../components-css/AdminSidebar.css";
 
 function UserSidebar({ isOpen }) {
@@ -23,33 +24,33 @@ function UserSidebar({ isOpen }) {
 
   const handleLogout = () => {
     Swal.fire({
-      title: 'Logout',
-      text: 'Are you sure you want to logout?',
-      icon: 'question',
+      title: "Logout",
+      text: "Are you sure you want to logout?",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, logout!',
-      background: '#fff',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, logout!",
+      background: "#fff",
       customClass: {
-        popup: 'animated fadeInDown'
-      }
+        popup: "animated fadeInDown",
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         // Clear all session data first
         sessionStorage.clear();
-        
+
         // Show success message
         Swal.fire({
-          icon: 'success',
-          title: 'Logged Out!',
-          text: 'You have been successfully logged out.',
+          icon: "success",
+          title: "Logged Out!",
+          text: "You have been successfully logged out.",
           timer: 1500,
           showConfirmButton: false,
-          background: '#fff',
+          background: "#fff",
           customClass: {
-            popup: 'animated fadeInDown'
-          }
+            popup: "animated fadeInDown",
+          },
         }).then(() => {
           // Force page reload and redirect
           window.location.href = "/login";
@@ -98,6 +99,14 @@ function UserSidebar({ isOpen }) {
           action
         >
           <FileEarmark className="me-3" /> Documents
+        </ListGroup.Item>
+        <ListGroup.Item
+          as={Link}
+          to="/archive-documents"
+          className="sidebar-item"
+          action
+        >
+          <Archive className="me-3" /> Archive Documents
         </ListGroup.Item>
         <ListGroup.Item
           as={Link}

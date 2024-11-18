@@ -1,4 +1,4 @@
-const Document = require('../models/Document'); // Import the Document model
+const Document = require("../models/Document"); // Import the Document model
 
 const requestDocument = async (req, res) => {
   const { email, title, content, department } = req.body;
@@ -7,13 +7,13 @@ const requestDocument = async (req, res) => {
     // Validate required fields
     if (!email || !title || !content || !department) {
       return res.status(400).json({
-        message: "All fields are required (email, title, content, department)"
+        message: "All fields are required (email, title, content, department)",
       });
     }
 
     // Find the highest docID using aggregation
     const highestDoc = await Document.aggregate([
-      { $group: { _id: null, maxDocID: { $max: "$docID" } } }
+      { $group: { _id: null, maxDocID: { $max: "$docID" } } },
     ]);
 
     // Calculate new docID (if no documents exist, start with 1)
@@ -26,7 +26,7 @@ const requestDocument = async (req, res) => {
       title,
       content,
       department,
-      status: 'Pending' // Set default status
+      status: "Pending", // Set default status
     });
 
     const savedDocument = await newDocument.save();
@@ -34,10 +34,10 @@ const requestDocument = async (req, res) => {
     res.status(201).json({
       success: true,
       message: `Document ${newDocID} created successfully!`,
-      document: savedDocument
+      document: savedDocument,
     });
   } catch (error) {
-    console.error('Document creation error:', error);
+    console.error("Document creation error:", error);
 
     // Handle duplicate key error specifically
     if (error.code === 11000) {
@@ -52,7 +52,7 @@ const requestDocument = async (req, res) => {
           title,
           content,
           department,
-          status: 'Pending' // Set default status
+          status: "Pending", // Set default status
         });
 
         const savedDocument = await retryDocument.save();
@@ -60,13 +60,13 @@ const requestDocument = async (req, res) => {
         return res.status(201).json({
           success: true,
           message: `Document ${retryDocID} created successfully!`,
-          document: savedDocument
+          document: savedDocument,
         });
       } catch (retryError) {
         return res.status(500).json({
           success: false,
           message: "Error creating document after retry",
-          error: retryError.message
+          error: retryError.message,
         });
       }
     }
@@ -74,7 +74,7 @@ const requestDocument = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error creating document",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -82,10 +82,11 @@ const requestDocument = async (req, res) => {
 // Get all documents
 const getDocuments = async (req, res) => {
   try {
-    const documents = await Document.find(); // Fetch all documents
+    // Only fetch documents where isArchived is false or doesn't exist
+    const documents = await Document.find({ isArchived: { $ne: true } });
     res.json(documents);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching documents' });
+    res.status(500).json({ message: "Error fetching documents" });
   }
 };
 
@@ -95,12 +96,12 @@ const searchDocumentsByTitle = async (req, res) => {
 
   try {
     const documents = await Document.find({
-      title: { $regex: title, $options: 'i' }, // Case-insensitive search
+      title: { $regex: title, $options: "i" }, // Case-insensitive search
     });
 
     res.json(documents);
   } catch (error) {
-    res.status(500).json({ message: 'Error searching documents', error });
+    res.status(500).json({ message: "Error searching documents", error });
   }
 };
 
@@ -111,7 +112,9 @@ const searchDocumentsByDocID = async (req, res) => {
   try {
     const document = await Document.findOne({ docID }); // Find by docID
     if (!document) {
-      return res.status(404).json({ message: `Document with docID ${docID} not found!` });
+      return res
+        .status(404)
+        .json({ message: `Document with docID ${docID} not found!` });
     }
 
     // Return the document along with docID in the response
@@ -120,10 +123,10 @@ const searchDocumentsByDocID = async (req, res) => {
       title: document.title,
       content: document.content,
       createdAt: document.createdAt,
-      updatedAt: document.updatedAt
+      updatedAt: document.updatedAt,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error searching for document', error });
+    res.status(500).json({ message: "Error searching for document", error });
   }
 };
 
@@ -134,11 +137,13 @@ const deleteDocument = async (req, res) => {
   try {
     const document = await Document.findOneAndDelete({ docID }); // Delete by docID
     if (!document) {
-      return res.status(404).json({ message: `Document with docID ${docID} not found!` });
+      return res
+        .status(404)
+        .json({ message: `Document with docID ${docID} not found!` });
     }
     res.json({ message: `Document ${docID} deleted successfully!` });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting document', error });
+    res.status(500).json({ message: "Error deleting document", error });
   }
 };
 
@@ -155,13 +160,86 @@ const updateDocument = async (req, res) => {
     );
 
     if (!document) {
-      return res.status(404).json({ message: `Document with docID ${docID} not found!` });
+      return res
+        .status(404)
+        .json({ message: `Document with docID ${docID} not found!` });
     }
 
     res.json({ message: `Document ${docID} updated successfully!`, document });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating document', error });
+    res.status(500).json({ message: "Error updating document", error });
   }
 };
 
-module.exports = { getDocuments, requestDocument, searchDocumentsByTitle, searchDocumentsByDocID, deleteDocument, updateDocument };
+const archiveDocument = async (req, res) => {
+  const { docID } = req.params;
+
+  try {
+    const document = await Document.findOneAndUpdate(
+      { docID },
+      { isArchived: true },
+      { new: true }
+    );
+
+    if (!document) {
+      return res
+        .status(404)
+        .json({ message: `Document with docID ${docID} not found!` });
+    }
+
+    res.json({ message: `Document ${docID} archived successfully!`, document });
+  } catch (error) {
+    res.status(500).json({ message: "Error archiving document", error });
+  }
+};
+
+const getArchivedDocuments = async (req, res) => {
+  try {
+    const documents = await Document.find({ isArchived: true });
+    res.json(documents);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching archived documents", error });
+  }
+};
+
+const unarchiveDocument = async (req, res) => {
+  const { docID } = req.params;
+
+  try {
+    const document = await Document.findOneAndUpdate(
+      { docID },
+      { isArchived: false },
+      { new: true }
+    );
+
+    if (!document) {
+      return res.status(404).json({
+        message: `Document with docID ${docID} not found!`,
+      });
+    }
+
+    res.json({
+      message: `Document ${docID} recovered successfully!`,
+      document,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error recovering document",
+      error,
+    });
+  }
+};
+
+module.exports = {
+  getDocuments,
+  requestDocument,
+  searchDocumentsByTitle,
+  searchDocumentsByDocID,
+  deleteDocument,
+  updateDocument,
+  archiveDocument,
+  getArchivedDocuments,
+  unarchiveDocument,
+};
