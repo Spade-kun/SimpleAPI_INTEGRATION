@@ -478,7 +478,7 @@ function UserDocuments() {
         }`}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
-          <List size={20} />
+          <List size={24} />
         </button>
         <div>
           <p style={{ opacity: 0.7 }}>
