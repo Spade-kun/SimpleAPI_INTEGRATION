@@ -12,6 +12,7 @@ import RequestsDocument from "./components/Admin/RequestsDocument";
 import Account from "./components/Admin/Account";
 import Users from "./components/Admin/Users";
 import ArchiveDocuments from "./components/User/ArchiveDocuments";
+import AdminNotifications from "./components/Admin/AdminNotifications";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -48,6 +49,14 @@ function App() {
         element={
           <ProtectedRoute role="admin">
             <Users />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-notifications"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminNotifications />
           </ProtectedRoute>
         }
       />

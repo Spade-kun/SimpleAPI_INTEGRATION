@@ -9,9 +9,10 @@ import {
   People,
   BoxArrowRight,
   PersonCircle,
+  Bell,
   PersonGear,
 } from "react-bootstrap-icons";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import "./../components-css/AdminSidebar.css";
 
 function AdminSidebar({ isOpen }) {
@@ -23,42 +24,45 @@ function AdminSidebar({ isOpen }) {
 
   const handleLogout = () => {
     Swal.fire({
-      title: 'Logout',
-      text: 'Are you sure you want to logout?',
-      icon: 'question',
+      title: "Logout",
+      text: "Are you sure you want to logout?",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, logout!',
-      background: '#fff',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, logout!",
+      background: "#fff",
       customClass: {
-        popup: 'animated fadeInDown'
-      }
+        popup: "animated fadeInDown",
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         // Clear all storage
         sessionStorage.clear();
         localStorage.clear();
-        
+
         // Double-check specific items are removed
         localStorage.removeItem("welcomeShown");
         sessionStorage.removeItem("welcomeShown");
         sessionStorage.removeItem("sessionToken");
         sessionStorage.removeItem("userInfo");
-        
+
         // Verify items are cleared
-        console.log("Welcome shown after clear:", localStorage.getItem("welcomeShown"));
-        
+        console.log(
+          "Welcome shown after clear:",
+          localStorage.getItem("welcomeShown")
+        );
+
         Swal.fire({
-          icon: 'success',
-          title: 'Logged Out!',
-          text: 'You have been successfully logged out.',
+          icon: "success",
+          title: "Logged Out!",
+          text: "You have been successfully logged out.",
           timer: 1500,
           showConfirmButton: false,
-          background: '#fff',
+          background: "#fff",
           customClass: {
-            popup: 'animated fadeInDown'
-          }
+            popup: "animated fadeInDown",
+          },
         }).then(() => {
           // Force page reload before navigation
           window.location.href = "/login";
@@ -120,6 +124,14 @@ function AdminSidebar({ isOpen }) {
           action
         >
           <People className="me-3" /> Users
+        </ListGroup.Item>
+        <ListGroup.Item
+          as={Link}
+          to="/admin-notifications"
+          className="sidebar-item"
+          action
+        >
+          <Bell className="me-3" /> Notifications
         </ListGroup.Item>
       </ListGroup>
 
