@@ -1,0 +1,142 @@
+@import url("https://fonts.googleapis.com/css2?family=Allura&family=Merienda:wght@300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-page {
+  display: flex;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-image: url('../../assets/bg.svg');
+  background-size: cover;
+  background-position: center;
+}
+
+.left-section {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  color: white;
+  z-index: 1;
+}
+
+.right-section {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  position: relative;
+  border-top-left-radius: 250px;
+  border-bottom-right-radius: 250px;
+  border-top-right-radius: 100px;
+  border-bottom-left-radius: 100px;
+
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.buksu-logo {
+  width: 150px;
+  margin-top: 75px;
+}
+
+.qa-logo {
+  width: 300px;
+  margin-top: 75px;
+}
+
+.left-section h2 {
+  font-size: 2rem;
+  margin: 10px 0;
+  margin-top: 80px;
+}
+
+.left-section p {
+  font-size: 1rem;
+}
+
+.right-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.2rem;
+  z-index: 2;
+}
+
+.login-card h3 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.login-card .g-recaptcha {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.login-card .g-recaptcha > div {
+  margin: 0 auto;
+}
+
+.login-txt {
+  font-family: "Montserrat", sans-serif;
+  font-style: italic;
+  font-weight: bolder;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.9);
+}
+.login-txt1 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+.login-txt2 {
+  font-family: "Montserrat", sans-serif;
+  font-style: italic;
+}
+.google-login {
+  width: 85%;
+}
+
+.MuiBackdrop-root {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.MuiCircularProgress-root {
+  width: 60px !important;
+  height: 60px !important;
+}
+

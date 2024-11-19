@@ -81,6 +81,53 @@ BukSU Document Request System
             message
         );
     }
+
+    async sendDocumentRequestNotification(adminEmail, userEmail, documentTitle) {
+        const message = `
+Hello Admin,
+
+A new document request has been submitted.
+
+Document Title: ${documentTitle}
+Requested By: ${userEmail}
+Request Time: ${new Date().toLocaleString()}
+
+Please review this request at your earliest convenience.
+
+Best regards,
+BukSU Document Request System
+        `.trim();
+
+        return await this.sendEmail(
+            adminEmail,
+            'New Document Request - BukSU DRS',
+            message
+        );
+    }
+
+    async sendDocumentStatusNotification(userEmail, documentTitle, status, remarks = '') {
+        const message = `
+Hello!
+
+Your document request status has been updated.
+
+Document Title: ${documentTitle}
+Status: ${status}
+${remarks ? `Remarks: ${remarks}` : ''}
+Update Time: ${new Date().toLocaleString()}
+
+You can check the details in your dashboard.
+
+Best regards,
+BukSU Document Request System
+        `.trim();
+
+        return await this.sendEmail(
+            userEmail,
+            `Document Request ${status} - BukSU DRS`,
+            message
+        );
+    }
 }
 
 module.exports = new EmailService();

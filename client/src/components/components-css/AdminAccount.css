@@ -1,0 +1,26 @@
+.account-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .field-label {
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .field-value {
+    color: #333;
+  }
+  
+  .admin-dashboard-content {
+    padding: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .field-label,
+    .field-value {
+      text-align: left;
+      margin-bottom: 5px;
+    }
+  }
