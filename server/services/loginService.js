@@ -5,6 +5,8 @@ const User = require('../models/User');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const { generateTokens } = require('./tokenService');
+
 const loginUser = async (req, res) => {
     const { token } = req.body;
 
@@ -17,7 +19,6 @@ const loginUser = async (req, res) => {
 
         const email = payload.email;
 
-        // Check if user exists in the database
         let user = await User.findOne({ email });
 
         if (!user) {
@@ -25,10 +26,10 @@ const loginUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // User exists, log their role
         console.log(`User ${email} logged in. Role: ${user.role}`);
 
-        // Log the response before sending it back
+        const { sessionToken, refreshToken } = generateTokens(user);
+
         const responsePayload = {
             message: 'Login successful',
             user: {
@@ -37,8 +38,10 @@ const loginUser = async (req, res) => {
                 picture: payload.picture,
                 role: user.role,
             },
+            token: sessionToken,
+            refreshToken: refreshToken,
         };
-        console.log('Response Payload:', responsePayload); // Debug log
+        console.log('Response Payload:', responsePayload);
         res.json(responsePayload);
     } catch (error) {
         console.error("Error verifying Google token:", error);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "../Sidebar/AdminSidebar";
-import { List, Check2Square, XSquare } from "react-bootstrap-icons";
+import { List, Check2Circle, XCircle } from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 import "../components-css/RequestDocument.css";
@@ -46,17 +46,15 @@ function RequestsDocument() {
             className="btn btn-success btn-sm mx-1"
             onClick={() => handleApprove(row.docID)}
             disabled={row.status !== 'Pending'}
-            title="Approve"
           >
-            <Check2Square size={16} />
+            <Check2Circle size={16} /> Approve
           </button>
           <button
             className="btn btn-danger btn-sm mx-1"
             onClick={() => handleReject(row.docID)}
             disabled={row.status !== 'Pending'}
-            title="Reject"
           >
-            <XSquare size={16} />
+            <XCircle size={16} /> Reject
           </button>
         </div>
       ),
@@ -107,19 +105,28 @@ function RequestsDocument() {
     }
   };
 
+  const openGoogleDocs = () => {
+    window.open('https://docs.google.com/document/u/0/', '_blank');
+  };
+
   return (
     <div className="admin-dashboard-container">
       <AdminSidebar isOpen={isSidebarOpen} />
       <div
-        className={`admin-dashboard-content ${!isSidebarOpen ? 'sidebar-closed' : ''}`}
+        className="admin-dashboard-content"
+        style={{ marginLeft: isSidebarOpen ? "" : "" }}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />
         </button>
-        <div>
+        <div className="main-content">
           <h1>Requests Document</h1>
+          <button className="btn btn-primary" onClick={openGoogleDocs}>
+            Edit Document
+          </button>
           <div className="requests-document-section">
             <DataTable
+              title="Document Requests"
               columns={columns}
               data={documents}
               pagination
@@ -127,8 +134,6 @@ function RequestsDocument() {
               responsive
               striped
               highlightOnHover
-              fixedHeader
-              fixedHeaderScrollHeight="calc(100vh - 315px)"
             />
           </div>
         </div>

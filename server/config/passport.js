@@ -4,7 +4,9 @@ const User = require('../models/User'); // Adjust the path as needed
 require('dotenv').config();
 passport.use(new GoogleTokenStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    accessType: 'offline',
+    prompt: 'consent'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const user = await User.findOne({ email: profile.email });
