@@ -10,6 +10,7 @@ const documentSchema = new mongoose.Schema(
     status: { type: String, required: true, default: "Pending" },
     createdAt: { type: Date, default: Date.now },
     isArchived: { type: Boolean, default: false },
+    filePath: { type: String },
   },
   {
     timestamps: true, // Mongoose will handle createdAt and updatedAt automatically

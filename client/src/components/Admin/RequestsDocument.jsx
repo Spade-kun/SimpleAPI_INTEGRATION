@@ -4,12 +4,18 @@ import { List, Check2Circle, XCircle } from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 import "../components-css/RequestDocument.css";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
 
 function RequestsDocument() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedDocID, setSelectedDocID] = useState(null);
+  const [file, setFile] = useState(null);
 
   // Define columns for DataTable
   const columns = [
@@ -85,14 +91,9 @@ function RequestsDocument() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleApprove = async (docID) => {
-    try {
-      await axios.put(`http://localhost:3000/documents/${docID}/approve`);
-      // Refresh the documents list
-      fetchDocuments();
-    } catch (error) {
-      console.error('Error approving document:', error);
-    }
+  const handleApprove = (docID) => {
+    setSelectedDocID(docID);
+    setShowModal(true);
   };
 
   const handleReject = async (docID) => {
@@ -102,6 +103,32 @@ function RequestsDocument() {
       fetchDocuments();
     } catch (error) {
       console.error('Error rejecting document:', error);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleSubmit = async () => {
+    if (!file) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await axios.post(`http://localhost:3000/documents/${selectedDocID}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setShowModal(false);
+      fetchDocuments(); // Refresh the documents list
+    } catch (error) {
+      console.error('Error uploading file:', error);
     }
   };
 
@@ -138,6 +165,27 @@ function RequestsDocument() {
           </div>
         </div>
       </div>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Upload File</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Select File</Form.Label>
+              <Form.Control type="file" onChange={handleFileChange} />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

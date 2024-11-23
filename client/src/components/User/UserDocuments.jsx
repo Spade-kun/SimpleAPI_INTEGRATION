@@ -382,6 +382,21 @@ function UserDocuments() {
     { name: "Email", selector: (row) => row.email, sortable: true },
     { name: "Status", selector: (row) => row.status, sortable: true },
     {
+      name: "File",
+      cell: (row) => (
+        row.filePath ? (
+          <a href={`http://localhost:3000/${row.filePath}`} target="_blank" rel="noopener noreferrer">
+            Download
+          </a>
+        ) : (
+          "No file"
+        )
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+    {
       name: "Actions",
       cell: (row) => (
         <div className="action-buttons">
@@ -473,9 +488,8 @@ function UserDocuments() {
       />
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className={`user-dashboard-content ${
-          isSidebarOpen ? "with-sidebar" : "without-sidebar"
-        }`}
+        className={`user-dashboard-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
+          }`}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />

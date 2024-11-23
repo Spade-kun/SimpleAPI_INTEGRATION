@@ -1,4 +1,6 @@
 const Document = require("../models/Document"); // Import the Document model
+const fs = require('fs');
+const path = require('path');
 
 const requestDocument = async (req, res) => {
   const { email, title, content, department } = req.body;
@@ -232,6 +234,32 @@ const unarchiveDocument = async (req, res) => {
   }
 };
 
+const uploadDocumentFile = async (req, res) => {
+  const { docID } = req.params;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  try {
+    // Update the document with the file path and change status to "Approved"
+    const document = await Document.findOneAndUpdate(
+      { docID },
+      { filePath: `uploads/${file.originalname}`, status: "Approved" }, // Store the full path
+      { new: true }
+    );
+
+    if (!document) {
+      return res.status(404).json({ message: `Document with docID ${docID} not found!` });
+    }
+
+    res.json({ message: `File uploaded successfully and document ${docID} approved!`, document });
+  } catch (error) {
+    res.status(500).json({ message: "Error uploading file", error });
+  }
+};
+
 module.exports = {
   getDocuments,
   requestDocument,
@@ -242,4 +270,5 @@ module.exports = {
   archiveDocument,
   getArchivedDocuments,
   unarchiveDocument,
+  uploadDocumentFile,
 };

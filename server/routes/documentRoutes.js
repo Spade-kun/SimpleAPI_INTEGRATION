@@ -9,7 +9,22 @@ const {
   archiveDocument,
   getArchivedDocuments,
   unarchiveDocument,
+  uploadDocumentFile,
 } = require("../services/documentService");
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer to store files with their original names
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname); // Use the original file name
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -39,5 +54,10 @@ router.patch("/unarchive/:docID", unarchiveDocument);
 
 // Get archived documents
 router.get("/archived", getArchivedDocuments);
+
+// Upload a file for a document
+router.post('/:docID/upload', upload.single('file'), uploadDocumentFile);
+
+
 
 module.exports = router;
