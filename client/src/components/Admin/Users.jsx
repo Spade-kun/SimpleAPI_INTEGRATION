@@ -12,6 +12,27 @@ import "../components-css/AdminUsers.css";
 
 Modal.setAppElement("#root");
 
+// Add these custom styles for the modal
+const customStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    zIndex: 1000,
+  },
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    maxWidth: "500px",
+    width: "90%",
+  },
+};
+
 function Users() {
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
@@ -260,6 +281,16 @@ function Users() {
     },
   ];
 
+  const roleOptions = ["admin", "user"];
+  const departmentOptions = [
+    "College of Technologies",
+    "College of Education",
+    "College of Nursing",
+    "College of Public Administration",
+    "College of Arts and Science",
+    "College of Business",
+  ];
+
   return (
     <div className="admin-layout">
       <ToastContainer
@@ -345,6 +376,7 @@ function Users() {
             <Modal
               isOpen={isEditModalOpen}
               onRequestClose={() => setIsEditModalOpen(false)}
+              style={customStyles}
               className="modal-content"
             >
               <h2>Edit User</h2>
@@ -365,22 +397,34 @@ function Users() {
                     setEditUser({ ...editUser, name: e.target.value })
                   }
                 />
-                <input
-                  type="text"
-                  placeholder="Role"
+                <select
+                  className="select-dropdown"
                   value={editUser.role}
                   onChange={(e) =>
                     setEditUser({ ...editUser, role: e.target.value })
                   }
-                />
-                <input
-                  type="text"
-                  placeholder="Department"
+                >
+                  <option value="">Select Role</option>
+                  {roleOptions.map((role, index) => (
+                    <option key={index} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="select-dropdown"
                   value={editUser.department}
                   onChange={(e) =>
                     setEditUser({ ...editUser, department: e.target.value })
                   }
-                />
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
                 <div className="modal-buttons">
                   <button onClick={confirmEditUser} className="custom-btn">
                     Confirm
@@ -401,6 +445,7 @@ function Users() {
             <Modal
               isOpen={isAddModalOpen}
               onRequestClose={() => setIsAddModalOpen(false)}
+              style={customStyles}
               className="modal-content"
             >
               <h2>Add User</h2>
@@ -421,22 +466,34 @@ function Users() {
                     setNewUser({ ...newUser, name: e.target.value })
                   }
                 />
-                <input
-                  type="text"
-                  placeholder="Role"
+                <select
+                  className="select-dropdown"
                   value={newUser.role}
                   onChange={(e) =>
                     setNewUser({ ...newUser, role: e.target.value })
                   }
-                />
-                <input
-                  type="text"
-                  placeholder="Department"
+                >
+                  <option value="">Select Role</option>
+                  {roleOptions.map((role, index) => (
+                    <option key={index} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="select-dropdown"
                   value={newUser.department}
                   onChange={(e) =>
                     setNewUser({ ...newUser, department: e.target.value })
                   }
-                />
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
                 <div className="modal-buttons">
                   <button onClick={confirmAddUser} className="custom-btn">
                     Confirm
