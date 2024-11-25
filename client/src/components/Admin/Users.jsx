@@ -173,7 +173,10 @@ function Users() {
         },
       });
 
-      const endpoint = newUser.role === "admin" ? "http://localhost:3000/admins/register" : "http://localhost:3000/users/register";
+      const endpoint =
+        newUser.role === "admin"
+          ? "http://localhost:3000/admins/register"
+          : "http://localhost:3000/users/register";
       await axios.post(endpoint, newUser);
 
       if (newUser.role === "admin") {
@@ -280,7 +283,9 @@ function Users() {
         <AdminSidebar isOpen={isSidebarOpen} />
 
         <div
-          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"}`}
+          className={`admin-content ${
+            isSidebarOpen ? "with-sidebar" : "without-sidebar"
+          }`}
           style={{ overflowY: "auto", maxHeight: "100vh" }}
         >
           <div className="admin-header">
@@ -306,9 +311,8 @@ function Users() {
               <h2>Admins</h2>
               <DataTable
                 columns={adminColumns}
-                data={admins.filter(
-                  (admin) =>
-                    admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+                data={admins.filter((admin) =>
+                  admin.email.toLowerCase().includes(searchTerm.toLowerCase())
                 )}
                 pagination
                 highlightOnHover
