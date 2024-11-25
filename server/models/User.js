@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     picture: String,
     department: String,
-    userID: { type: Number, unique: true, required: true },
+    userID: { type: Number, unique: true, sparse: true },
     googleId: String, // If you are using Google login, this might be needed
 }, { timestamps: true });
 

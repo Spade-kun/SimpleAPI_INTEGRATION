@@ -1,38 +1,53 @@
 const User = require("../models/User");
+const Admin = require("../models/Admin");
 
 // Create a new user
 const createUser = async (req, res) => {
-  const { email, role, name, picture, department } = req.body; // No need to pass userID in request body
+  const { email, role, name, picture, department } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingAdmin = await Admin.findOne({ email });
+
+    if (existingUser || existingAdmin) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Find the last inserted user and increment userID
-    const lastUser = await User.findOne().sort({ userID: -1 }); // Sort by userID in descending order
-    const nextUserID = lastUser ? lastUser.userID + 1 : 1; // If no user exists, start from 1
+    if (role === "admin") {
+      const lastAdmin = await Admin.findOne().sort({ adminID: -1 });
+      const nextAdminID = lastAdmin && lastAdmin.adminID != null ? lastAdmin.adminID + 1 : 1;
 
-    // Create a new user with auto-incremented userID
-    const newUser = new User({
-      email,
-      role,
-      name,
-      picture,
-      department,
-      userID: nextUserID, // Set the incremented userID
-    });
+      const newAdmin = new Admin({
+        email,
+        role,
+        name,
+        picture,
+        department,
+        adminID: nextAdminID,
+      });
 
-    // Call the generateGoogleId method before saving if googleId is not provided
-    newUser.generateGoogleId();
+      newAdmin.generateGoogleId();
+      await newAdmin.save();
 
-    // Save the user to the database
-    await newUser.save();
+      return res.status(201).json({ message: "Admin registered successfully", admin: newAdmin });
+    } else {
+      const lastUser = await User.findOne().sort({ userID: -1 });
+      const nextUserID = lastUser && lastUser.userID != null ? lastUser.userID + 1 : 1;
 
-    res
-      .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+      const newUser = new User({
+        email,
+        role,
+        name,
+        picture,
+        department,
+        userID: nextUserID,
+      });
+
+      newUser.generateGoogleId();
+      await newUser.save();
+
+      return res.status(201).json({ message: "User registered successfully", user: newUser });
+    }
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ message: "Server error" });

@@ -14,6 +14,7 @@ Modal.setAppElement("#root");
 
 function Users() {
   const [users, setUsers] = useState([]);
+  const [admins, setAdmins] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editUser, setEditUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,13 +33,22 @@ function Users() {
 
   const navigate = useNavigate();
 
-  // Fetch users whenever the component mounts or when a user is added/updated
+  // Fetch users and admins whenever the component mounts or when a user is added/updated
   const fetchUsers = async () => {
     try {
       const response = await axios.get("http://localhost:3000/users/");
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/admins/");
+      setAdmins(response.data);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
     }
   };
 
@@ -62,6 +72,7 @@ function Users() {
       localStorage.setItem("welcomeShown", "true");
     }
     fetchUsers();
+    fetchAdmins();
   }, []);
 
   const handleEditUser = (user) => {
@@ -162,8 +173,15 @@ function Users() {
         },
       });
 
-      await axios.post("http://localhost:3000/users/register", newUser);
-      fetchUsers();
+      const endpoint = newUser.role === "admin" ? "http://localhost:3000/admins/register" : "http://localhost:3000/users/register";
+      await axios.post(endpoint, newUser);
+
+      if (newUser.role === "admin") {
+        fetchAdmins();
+      } else {
+        fetchUsers();
+      }
+
       setIsAddModalOpen(false);
 
       Swal.fire({
@@ -189,7 +207,6 @@ function Users() {
   };
 
   const columns = [
-    { name: "UserID", selector: (row) => row.userID, sortable: true },
     { name: "Email", selector: (row) => row.email, sortable: true },
     { name: "Name", selector: (row) => row.name, sortable: true },
     { name: "Role", selector: (row) => row.role, sortable: true },
@@ -202,7 +219,35 @@ function Users() {
             Edit
           </button>
           <button
-            onClick={() => handleDeleteUser(row.userID)}
+            onClick={() => handleDeleteUser(row.userID || row.adminID)}
+            className="custom-btn1"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const userColumns = [
+    { name: "UserID", selector: (row) => row.userID, sortable: true },
+    ...columns,
+  ];
+
+  const adminColumns = [
+    { name: "AdminID", selector: (row) => row.adminID, sortable: true },
+    { name: "Email", selector: (row) => row.email, sortable: true },
+    { name: "Name", selector: (row) => row.name, sortable: true },
+    { name: "Department", selector: (row) => row.department, sortable: true },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div>
+          <button onClick={() => handleEditUser(row)} className="custom-btn2">
+            Edit
+          </button>
+          <button
+            onClick={() => handleDeleteUser(row.adminID)}
             className="custom-btn1"
           >
             Delete
@@ -231,156 +276,178 @@ function Users() {
         <List size={24} />
       </button>
 
-      <AdminSidebar isOpen={isSidebarOpen} />
+      <div className="admin-container">
+        <AdminSidebar isOpen={isSidebarOpen} />
 
-      <div
-        className={`admin-container ${
-          isSidebarOpen ? "with-sidebar" : "without-sidebar"
-        }`}
-      >
-        <div className="admin-header">
-          <h1>Admin Dashboard</h1>
-          <p>Welcome, Admin! Here you can manage users and view reports.</p>
-        </div>
+        <div
+          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"}`}
+          style={{ overflowY: "auto", maxHeight: "100vh" }}
+        >
+          <div className="admin-header">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, Admin! Here you can manage users and view reports.</p>
+          </div>
 
-        <div className="admin-controls">
-          <button onClick={handleAddUser} className="custom-btn">
-            Add User
-          </button>
-          <input
-            type="text"
-            placeholder="Search by Email"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
+          <div className="admin-controls">
+            <button onClick={handleAddUser} className="custom-btn">
+              Add User
+            </button>
+            <input
+              type="text"
+              placeholder="Search by Email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
 
-        <div className="table-container">
-          <DataTable
-            columns={columns}
-            data={users.filter((user) =>
-              user.email.toLowerCase().includes(searchTerm.toLowerCase())
-            )}
-            pagination
-            highlightOnHover
-            striped
-            fixedHeader
-            fixedHeaderScrollHeight="calc(100vh - 350px)"
-          />
-        </div>
-
-        {/* Edit Modal */}
-        {isEditModalOpen && (
-          <Modal
-            isOpen={isEditModalOpen}
-            onRequestClose={() => setIsEditModalOpen(false)}
-            className="modal-content"
-          >
-            <h2>Edit User</h2>
-            <div className="modal-form">
-              <input
-                type="text"
-                placeholder="Email"
-                value={editUser.email}
-                onChange={(e) =>
-                  setEditUser({ ...editUser, email: e.target.value })
-                }
+          <div className="scrollable-table-container">
+            <div className="table-section">
+              <h2>Admins</h2>
+              <DataTable
+                columns={adminColumns}
+                data={admins.filter(
+                  (admin) =>
+                    admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+                )}
+                pagination
+                highlightOnHover
+                striped
+                fixedHeader
+                fixedHeaderScrollHeight="calc(100vh - 350px)"
               />
-              <input
-                type="text"
-                placeholder="Name"
-                value={editUser.name}
-                onChange={(e) =>
-                  setEditUser({ ...editUser, name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Role"
-                value={editUser.role}
-                onChange={(e) =>
-                  setEditUser({ ...editUser, role: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Department"
-                value={editUser.department}
-                onChange={(e) =>
-                  setEditUser({ ...editUser, department: e.target.value })
-                }
-              />
-              <div className="modal-buttons">
-                <button onClick={confirmEditUser} className="custom-btn">
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="custom-btn1"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
-          </Modal>
-        )}
 
-        {/* Add Modal */}
-        {isAddModalOpen && (
-          <Modal
-            isOpen={isAddModalOpen}
-            onRequestClose={() => setIsAddModalOpen(false)}
-            className="modal-content"
-          >
-            <h2>Add User</h2>
-            <div className="modal-form">
-              <input
-                type="text"
-                placeholder="Email"
-                value={newUser.email}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
-                }
+            <div className="table-section">
+              <h2>Users</h2>
+              <DataTable
+                columns={userColumns}
+                data={users.filter(
+                  (user) =>
+                    user.role === "user" &&
+                    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+                )}
+                pagination
+                highlightOnHover
+                striped
+                fixedHeader
+                fixedHeaderScrollHeight="calc(100vh - 350px)"
               />
-              <input
-                type="text"
-                placeholder="Name"
-                value={newUser.name}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Role"
-                value={newUser.role}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, role: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Department"
-                value={newUser.department}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, department: e.target.value })
-                }
-              />
-              <div className="modal-buttons">
-                <button onClick={confirmAddUser} className="custom-btn">
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="custom-btn1"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
-          </Modal>
-        )}
+          </div>
+
+          {/* Edit Modal */}
+          {isEditModalOpen && (
+            <Modal
+              isOpen={isEditModalOpen}
+              onRequestClose={() => setIsEditModalOpen(false)}
+              className="modal-content"
+            >
+              <h2>Edit User</h2>
+              <div className="modal-form">
+                <input
+                  type="text"
+                  placeholder="Email"
+                  value={editUser.email}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, email: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={editUser.name}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Role"
+                  value={editUser.role}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, role: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Department"
+                  value={editUser.department}
+                  onChange={(e) =>
+                    setEditUser({ ...editUser, department: e.target.value })
+                  }
+                />
+                <div className="modal-buttons">
+                  <button onClick={confirmEditUser} className="custom-btn">
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="custom-btn1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {/* Add Modal */}
+          {isAddModalOpen && (
+            <Modal
+              isOpen={isAddModalOpen}
+              onRequestClose={() => setIsAddModalOpen(false)}
+              className="modal-content"
+            >
+              <h2>Add User</h2>
+              <div className="modal-form">
+                <input
+                  type="text"
+                  placeholder="Email"
+                  value={newUser.email}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, email: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={newUser.name}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Role"
+                  value={newUser.role}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, role: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Department"
+                  value={newUser.department}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, department: e.target.value })
+                  }
+                />
+                <div className="modal-buttons">
+                  <button onClick={confirmAddUser} className="custom-btn">
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="custom-btn1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Modal>
+          )}
+        </div>
       </div>
     </div>
   );

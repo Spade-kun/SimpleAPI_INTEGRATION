@@ -7,6 +7,7 @@ const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 
 const app = express();
@@ -161,6 +162,7 @@ app.post("/refresh-token", async (req, res) => {
 
 // Use the user routes
 app.use("/users", userRoutes);
+app.use("/admins", adminRoutes);
 app.use("/documents", documentRoutes);
 
 // Logout route to clear the session
