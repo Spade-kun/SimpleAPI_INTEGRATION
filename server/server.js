@@ -9,6 +9,7 @@ const User = require("./models/User");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const Admin = require("./models/Admin");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,14 +62,33 @@ app.get(
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    // Successful authentication, redirect based on role
-    if (req.user.role === "admin") {
-      res.redirect("/admin");
-    } else if (req.user.role === "user") {
-      res.redirect("/user");
-    } else {
-      res.redirect("/login"); // Or handle unknown roles
+  async (req, res) => {
+    try {
+      // Check if the user is an admin
+      let user = await Admin.findOne({ email: req.user.email });
+      let role = 'admin';
+
+      if (!user) {
+        // If not an admin, check if the user is a regular user
+        user = await User.findOne({ email: req.user.email });
+        role = 'user';
+      }
+
+      if (!user) {
+        return res.redirect("/login"); // Handle unknown roles
+      }
+
+      // Successful authentication, redirect based on role
+      if (role === "admin") {
+        res.redirect("/admin");
+      } else if (role === "user") {
+        res.redirect("/user");
+      } else {
+        res.redirect("/login"); // Or handle unknown roles
+      }
+    } catch (error) {
+      console.error("Error during authentication callback:", error);
+      res.redirect("/login");
     }
   }
 );
@@ -96,7 +116,18 @@ app.post("/login/google", async (req, res) => {
     });
     const payload = ticket.getPayload();
 
-    let user = await User.findOne({ email: payload.email });
+    // Extract picture from payload
+    const picture = payload.picture;
+
+    // Check if the user is an admin
+    let user = await Admin.findOne({ email: payload.email });
+    let role = 'admin';
+
+    if (!user) {
+      // If not an admin, check if the user is a regular user
+      user = await User.findOne({ email: payload.email });
+      role = 'user';
+    }
 
     if (!user) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
@@ -104,7 +135,7 @@ app.post("/login/google", async (req, res) => {
 
     // Generate access token (1 hour expiration)
     const sessionToken = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -118,7 +149,7 @@ app.post("/login/google", async (req, res) => {
 
     res.json({
       message: "Login successful",
-      user: { name: user.name, email: user.email, role: user.role, picture: user.picture },
+      user: { name: user.name, email: user.email, role: role, picture: picture || user.picture },
       token: sessionToken,
       refreshToken: refreshToken,
     });
