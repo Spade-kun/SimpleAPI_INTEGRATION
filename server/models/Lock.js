@@ -8,6 +8,15 @@ const lockSchema = new mongoose.Schema({
     button: {
         type: String,
         required: true,
+        unique: true,
+    },
+    userID: {
+        type: String,
+        default: null,
+    },
+    adminID: {
+        type: String,
+        default: null,
     },
 }, { timestamps: true });
 

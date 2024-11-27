@@ -96,18 +96,34 @@ function Users() {
     fetchAdmins();
   }, []);
 
-  const handleEditUser = (user) => {
-    setEditUser(user);
-    setIsEditModalOpen(true);
+  const handleEditUser = async (user) => {
+    try {
+      const id = user.userID || user.adminID;
+      const response = await axios.get(`http://localhost:3000/lock/edit_user`);
+      if (response.data.isLocked) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Locked!',
+          text: 'Another admin is currently editing this user. Please wait.',
+          background: '#fff',
+        });
+        return;
+      }
+
+      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: true, userID: id });
+      setEditUser(user);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error('Error checking lock status:', error);
+    }
   };
 
   const confirmEditUser = async () => {
     try {
-      await axios.patch(
-        `http://localhost:3000/users/${editUser.userID}`,
-        editUser
-      );
+      const id = editUser.userID || editUser.adminID;
+      await axios.patch(`http://localhost:3000/users/${id}`, editUser);
       fetchUsers();
+      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
       setIsEditModalOpen(false);
       Swal.fire({
         icon: "success",
@@ -131,24 +147,50 @@ function Users() {
     }
   };
 
-  const handleDeleteUser = (userID) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-      background: "#fff",
-      customClass: {
-        popup: "animated fadeInDown",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        confirmDelete(userID);
+  const cancelEditUser = async () => {
+    try {
+      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error unlocking edit user:', error);
+    }
+  };
+
+  const handleDeleteUser = async (userID) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/lock/delete_user`);
+      if (response.data.isLocked) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Locked!',
+          text: 'Another admin is currently deleting this user. Please wait.',
+          background: '#fff',
+        });
+        return;
       }
-    });
+
+      await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: true, userID });
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+        background: "#fff",
+        customClass: {
+          popup: "animated fadeInDown",
+        },
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await confirmDelete(userID);
+          await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
+        }
+      });
+    } catch (error) {
+      console.error('Error checking lock status:', error);
+    }
   };
 
   const confirmDelete = async (userID) => {
@@ -399,7 +441,7 @@ function Users() {
           {isEditModalOpen && (
             <Modal
               isOpen={isEditModalOpen}
-              onRequestClose={() => setIsEditModalOpen(false)}
+              onRequestClose={cancelEditUser}
               style={customStyles}
               className="modal-content"
             >
@@ -454,7 +496,7 @@ function Users() {
                     Confirm
                   </button>
                   <button
-                    onClick={() => setIsEditModalOpen(false)}
+                    onClick={cancelEditUser}
                     className="custom-btn1"
                   >
                     Cancel
