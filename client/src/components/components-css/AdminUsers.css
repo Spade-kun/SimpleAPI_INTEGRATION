@@ -248,7 +248,6 @@ html {
 
 /* Responsive Styles */
 @media screen and (max-width: 768px) {
-
   .admin-container.with-sidebar,
   .admin-container.without-sidebar {
     margin-left: 0;
@@ -264,7 +263,6 @@ html {
 }
 
 @media screen and (max-width: 480px) {
-
   .admin-header,
   .admin-controls {
     padding: 15px;
@@ -301,4 +299,26 @@ html {
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 20px;
+}
+
+/* Dropdown Styles */
+.select-dropdown {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #f5f7fa;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.select-dropdown:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.select-dropdown option {
+  color: #333;
+  background-color: #fff;
 }

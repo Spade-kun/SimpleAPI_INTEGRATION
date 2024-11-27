@@ -12,6 +12,27 @@ import "../components-css/AdminUsers.css";
 
 Modal.setAppElement("#root");
 
+// Add these custom styles for the modal
+const customStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    zIndex: 1000,
+  },
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    maxWidth: "500px",
+    width: "90%",
+  },
+};
+
 function Users() {
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
@@ -156,25 +177,9 @@ function Users() {
     }
   };
 
-  const handleAddUser = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/lock/add_user');
-      if (response.data.isLocked) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently adding a user. Please wait.',
-          background: '#fff',
-        });
-        return;
-      }
-
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: true });
-      setNewUser({ email: "", name: "", role: "", department: "" });
-      setIsAddModalOpen(true);
-    } catch (error) {
-      console.error('Error checking lock status:', error);
-    }
+  const handleAddUser = () => {
+    setNewUser({ email: "", name: "", role: "", department: "" });
+    setIsAddModalOpen(true);
   };
 
   const confirmAddUser = async () => {
@@ -189,7 +194,10 @@ function Users() {
         },
       });
 
-      const endpoint = newUser.role === "admin" ? "http://localhost:3000/admins/register" : "http://localhost:3000/users/register";
+      const endpoint =
+        newUser.role === "admin"
+          ? "http://localhost:3000/admins/register"
+          : "http://localhost:3000/users/register";
       await axios.post(endpoint, newUser);
 
       if (newUser.role === "admin") {
@@ -198,7 +206,6 @@ function Users() {
         fetchUsers();
       }
 
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
       setIsAddModalOpen(false);
 
       Swal.fire({
@@ -220,15 +227,6 @@ function Users() {
         text: "Failed to add new user.",
         background: "#fff",
       });
-    }
-  };
-
-  const cancelAddUser = async () => {
-    try {
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
-      setIsAddModalOpen(false);
-    } catch (error) {
-      console.error('Error unlocking add user:', error);
     }
   };
 
@@ -283,6 +281,16 @@ function Users() {
     },
   ];
 
+  const roleOptions = ["admin", "user"];
+  const departmentOptions = [
+    "College of Technologies",
+    "College of Education",
+    "College of Nursing",
+    "College of Public Administration",
+    "College of Arts and Science",
+    "College of Business",
+  ];
+
   return (
     <div className="admin-layout">
       <ToastContainer
@@ -306,7 +314,8 @@ function Users() {
         <AdminSidebar isOpen={isSidebarOpen} />
 
         <div
-          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"}`}
+          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
+            }`}
           style={{ overflowY: "auto", maxHeight: "100vh" }}
         >
           <div className="admin-header">
@@ -332,9 +341,8 @@ function Users() {
               <h2>Admins</h2>
               <DataTable
                 columns={adminColumns}
-                data={admins.filter(
-                  (admin) =>
-                    admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+                data={admins.filter((admin) =>
+                  admin.email.toLowerCase().includes(searchTerm.toLowerCase())
                 )}
                 pagination
                 highlightOnHover
@@ -367,6 +375,7 @@ function Users() {
             <Modal
               isOpen={isEditModalOpen}
               onRequestClose={() => setIsEditModalOpen(false)}
+              style={customStyles}
               className="modal-content"
             >
               <h2>Edit User</h2>
@@ -387,22 +396,34 @@ function Users() {
                     setEditUser({ ...editUser, name: e.target.value })
                   }
                 />
-                <input
-                  type="text"
-                  placeholder="Role"
+                <select
+                  className="select-dropdown"
                   value={editUser.role}
                   onChange={(e) =>
                     setEditUser({ ...editUser, role: e.target.value })
                   }
-                />
-                <input
-                  type="text"
-                  placeholder="Department"
+                >
+                  <option value="">Select Role</option>
+                  {roleOptions.map((role, index) => (
+                    <option key={index} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="select-dropdown"
                   value={editUser.department}
                   onChange={(e) =>
                     setEditUser({ ...editUser, department: e.target.value })
                   }
-                />
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
                 <div className="modal-buttons">
                   <button onClick={confirmEditUser} className="custom-btn">
                     Confirm
@@ -422,7 +443,8 @@ function Users() {
           {isAddModalOpen && (
             <Modal
               isOpen={isAddModalOpen}
-              onRequestClose={cancelAddUser}
+              onRequestClose={() => setIsAddModalOpen(false)}
+              style={customStyles}
               className="modal-content"
             >
               <h2>Add User</h2>
@@ -443,28 +465,40 @@ function Users() {
                     setNewUser({ ...newUser, name: e.target.value })
                   }
                 />
-                <input
-                  type="text"
-                  placeholder="Role"
+                <select
+                  className="select-dropdown"
                   value={newUser.role}
                   onChange={(e) =>
                     setNewUser({ ...newUser, role: e.target.value })
                   }
-                />
-                <input
-                  type="text"
-                  placeholder="Department"
+                >
+                  <option value="">Select Role</option>
+                  {roleOptions.map((role, index) => (
+                    <option key={index} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="select-dropdown"
                   value={newUser.department}
                   onChange={(e) =>
                     setNewUser({ ...newUser, department: e.target.value })
                   }
-                />
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
                 <div className="modal-buttons">
                   <button onClick={confirmAddUser} className="custom-btn">
                     Confirm
                   </button>
                   <button
-                    onClick={cancelAddUser}
+                    onClick={() => setIsAddModalOpen(false)}
                     className="custom-btn1"
                   >
                     Cancel
