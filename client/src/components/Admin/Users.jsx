@@ -121,8 +121,10 @@ function Users() {
   const confirmEditUser = async () => {
     try {
       const id = editUser.userID || editUser.adminID;
-      await axios.patch(`http://localhost:3000/users/${id}`, editUser);
+      const endpoint = editUser.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
+      await axios.patch(endpoint, editUser);
       fetchUsers();
+      fetchAdmins();
       await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
       setIsEditModalOpen(false);
       Swal.fire({
@@ -156,8 +158,9 @@ function Users() {
     }
   };
 
-  const handleDeleteUser = async (userID) => {
+  const handleDeleteUser = async (user) => {
     try {
+      const id = user.userID || user.adminID;
       const response = await axios.get(`http://localhost:3000/lock/delete_user`);
       if (response.data.isLocked) {
         Swal.fire({
@@ -169,7 +172,8 @@ function Users() {
         return;
       }
 
-      await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: true, userID });
+      await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: true, userID: id });
+
       Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -184,38 +188,40 @@ function Users() {
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await confirmDelete(userID);
+          const endpoint = user.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
+
+          try {
+            await axios.delete(endpoint);
+            fetchUsers();
+            fetchAdmins();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              text: "User has been deleted.",
+              timer: 1500,
+              showConfirmButton: false,
+              background: "#fff",
+              customClass: {
+                popup: "animated fadeInDown",
+              },
+            });
+          } catch (deleteError) {
+            console.error('Error deleting user:', deleteError.response ? deleteError.response.data : deleteError.message);
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: "Failed to delete user.",
+              background: "#fff",
+            });
+          } finally {
+            await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
+          }
+        } else {
           await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
         }
       });
     } catch (error) {
       console.error('Error checking lock status:', error);
-    }
-  };
-
-  const confirmDelete = async (userID) => {
-    try {
-      await axios.delete(`http://localhost:3000/users/${userID}`);
-      fetchUsers();
-      Swal.fire({
-        icon: "success",
-        title: "Deleted!",
-        text: "User has been deleted.",
-        timer: 1500,
-        showConfirmButton: false,
-        background: "#fff",
-        customClass: {
-          popup: "animated fadeInDown",
-        },
-      });
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: "Failed to delete user.",
-        background: "#fff",
-      });
     }
   };
 
@@ -310,7 +316,7 @@ function Users() {
             Edit
           </button>
           <button
-            onClick={() => handleDeleteUser(row.userID || row.adminID)}
+            onClick={() => handleDeleteUser(row)}
             className="custom-btn1"
           >
             Delete
@@ -338,7 +344,7 @@ function Users() {
             Edit
           </button>
           <button
-            onClick={() => handleDeleteUser(row.adminID)}
+            onClick={() => handleDeleteUser(row)}
             className="custom-btn1"
           >
             Delete
