@@ -10,6 +10,11 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const Admin = require("./models/Admin");
+const { lockResource, unlockResource, isResourceLocked } = require('./services/lockService');
+const lockRoutes = require("./routes/lockRoutes");
+
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -195,6 +200,7 @@ app.post("/refresh-token", async (req, res) => {
 app.use("/users", userRoutes);
 app.use("/admins", adminRoutes);
 app.use("/documents", documentRoutes);
+app.use("/lock", lockRoutes);
 
 // Logout route to clear the session
 app.post("/logout", (req, res) => {

@@ -156,9 +156,25 @@ function Users() {
     }
   };
 
-  const handleAddUser = () => {
-    setNewUser({ email: "", name: "", role: "", department: "" });
-    setIsAddModalOpen(true);
+  const handleAddUser = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/lock/add_user');
+      if (response.data.isLocked) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Locked!',
+          text: 'Another admin is currently adding a user. Please wait.',
+          background: '#fff',
+        });
+        return;
+      }
+
+      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: true });
+      setNewUser({ email: "", name: "", role: "", department: "" });
+      setIsAddModalOpen(true);
+    } catch (error) {
+      console.error('Error checking lock status:', error);
+    }
   };
 
   const confirmAddUser = async () => {
@@ -182,6 +198,7 @@ function Users() {
         fetchUsers();
       }
 
+      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
       setIsAddModalOpen(false);
 
       Swal.fire({
@@ -203,6 +220,15 @@ function Users() {
         text: "Failed to add new user.",
         background: "#fff",
       });
+    }
+  };
+
+  const cancelAddUser = async () => {
+    try {
+      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error unlocking add user:', error);
     }
   };
 
@@ -396,7 +422,7 @@ function Users() {
           {isAddModalOpen && (
             <Modal
               isOpen={isAddModalOpen}
-              onRequestClose={() => setIsAddModalOpen(false)}
+              onRequestClose={cancelAddUser}
               className="modal-content"
             >
               <h2>Add User</h2>
@@ -438,7 +464,7 @@ function Users() {
                     Confirm
                   </button>
                   <button
-                    onClick={() => setIsAddModalOpen(false)}
+                    onClick={cancelAddUser}
                     className="custom-btn1"
                   >
                     Cancel
