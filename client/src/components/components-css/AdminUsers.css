@@ -324,3 +324,14 @@ html {
   color: #333;
   background-color: #fff;
 }
+
+.disabled-input {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+.disabled-input:hover {
+  border-color: #ddd;
+}

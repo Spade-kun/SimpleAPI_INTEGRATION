@@ -174,11 +174,11 @@ function Users() {
         userID: id
       });
 
-      setEditUser(user);
+      // Store the original role when setting up edit
+      setEditUser({ ...user, originalRole: user.role });
       setEditingUserId(id);
       setIsEditModalOpen(true);
 
-      // Start the lock timer
       startLockTimer();
 
     } catch (error) {
@@ -190,19 +190,49 @@ function Users() {
   const confirmEditUser = async () => {
     try {
       const id = editUser.userID || editUser.adminID;
-      const endpoint = editUser.role === "admin"
-        ? `http://localhost:3000/admins/${id}`
-        : `http://localhost:3000/users/${id}`;
 
-      await axios.patch(endpoint, editUser);
+      // If role is changing
+      if (editUser.role !== editUser.originalRole) {
+        let newData = {
+          email: editUser.email,
+          name: editUser.name,
+          department: editUser.department,
+          role: editUser.role,
+          transferFromId: id,  // Add this to indicate it's a transfer
+          originalRole: editUser.originalRole  // Add this to indicate the original role
+        };
 
-      // Clear the lock timer
+        if (editUser.role === "admin") {
+          // Converting from user to admin
+          // First, create new admin
+          const adminResponse = await axios.post('http://localhost:3000/admins/transfer', newData);
+          if (adminResponse.data.success) {
+            // Then delete the user
+            await axios.delete(`http://localhost:3000/users/${id}`);
+          }
+        } else if (editUser.role === "user") {
+          // Converting from admin to user
+          // First, create new user
+          const userResponse = await axios.post('http://localhost:3000/users/transfer', newData);
+          if (userResponse.data.success) {
+            // Then delete the admin
+            await axios.delete(`http://localhost:3000/admins/${id}`);
+          }
+        }
+      } else {
+        // If role is not changing, just update the existing record
+        const endpoint = editUser.role === "admin"
+          ? `http://localhost:3000/admins/${id}`
+          : `http://localhost:3000/users/${id}`;
+
+        await axios.patch(endpoint, editUser);
+      }
+
+      // Clear the lock timer and release the lock
       if (lockTimer) {
         clearTimeout(lockTimer);
         setLockTimer(null);
       }
-
-      // Release the lock
       await axios.patch(`http://localhost:3000/lock/edit_user`, {
         isLocked: false,
         userID: null
@@ -212,13 +242,14 @@ function Users() {
       setEditingUserId(null);
       setEditUser(null);
 
+      // Refresh both tables
       fetchUsers();
       fetchAdmins();
 
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "User updated successfully!",
+        text: `Successfully changed role to ${editUser.role}!`,
         timer: 1500,
         showConfirmButton: false,
         background: "#fff",
@@ -228,7 +259,7 @@ function Users() {
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: "Failed to update user.",
+        text: error.response?.data?.message || "Failed to update user.",
         background: "#fff",
       });
     }
@@ -311,32 +342,55 @@ function Users() {
     }
   };
 
-  const handleAddUser = async (userData) => {
+  const handleAddUser = async () => {
     try {
-      // No need to check locks for adding users
-      const endpoint = userData.role === "admin"
-        ? "http://localhost:3000/admins"
-        : "http://localhost:3000/users";
+      // Validate required fields
+      if (!newUser.email || !newUser.name || !newUser.role || !newUser.department) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Information",
+          text: "Please fill in all required fields.",
+          background: "#fff",
+        });
+        return;
+      }
 
-      await axios.post(endpoint, userData);
-      fetchUsers();
-      fetchAdmins();
-      setIsAddModalOpen(false);
+      // Choose endpoint based on role
+      const endpoint = newUser.role === "admin"
+        ? "http://localhost:3000/admins/register"
+        : "http://localhost:3000/users/register";
 
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "User added successfully!",
-        timer: 1500,
-        showConfirmButton: false,
-        background: "#fff",
-      });
+      const response = await axios.post(endpoint, newUser);
+
+      if (response.data) {
+        setIsAddModalOpen(false);
+        // Reset the newUser state
+        setNewUser({
+          email: "",
+          name: "",
+          role: "",
+          department: ""
+        });
+
+        // Refresh the tables
+        fetchUsers();
+        fetchAdmins();
+
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `${newUser.role === "admin" ? "Admin" : "User"} added successfully!`,
+          timer: 1500,
+          showConfirmButton: false,
+          background: "#fff",
+        });
+      }
     } catch (error) {
       console.error("Error adding user:", error);
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: "Failed to add user.",
+        text: error.response?.data?.message || "Failed to add user.",
         background: "#fff",
       });
     }
@@ -406,6 +460,7 @@ function Users() {
     { name: "AdminID", selector: (row) => row.adminID, sortable: true },
     { name: "Email", selector: (row) => row.email, sortable: true },
     { name: "Name", selector: (row) => row.name, sortable: true },
+    { name: "Role", selector: (row) => row.role, sortable: true },
     { name: "Department", selector: (row) => row.department, sortable: true },
     {
       name: "Actions",
@@ -516,9 +571,8 @@ function Users() {
                   type="text"
                   placeholder="Email"
                   value={editUser.email}
-                  onChange={(e) =>
-                    setEditUser({ ...editUser, email: e.target.value })
-                  }
+                  disabled  // Email field is now disabled
+                  className="disabled-input"  // Add this class for styling
                 />
                 <input
                   type="text"
@@ -560,10 +614,7 @@ function Users() {
                   <button onClick={confirmEditUser} className="custom-btn">
                     Confirm
                   </button>
-                  <button
-                    onClick={cancelEditUser}
-                    className="custom-btn1"
-                  >
+                  <button onClick={cancelEditUser} className="custom-btn1">
                     Cancel
                   </button>
                 </div>

@@ -3,55 +3,76 @@ const Admin = require("../models/Admin");
 
 // Create a new user
 const createUser = async (req, res) => {
-  const { email, role, name, picture, department } = req.body;
+  const { email, name, department, role = 'user' } = req.body;
 
   try {
+    // Check if email exists in either collection
     const existingUser = await User.findOne({ email });
     const existingAdmin = await Admin.findOne({ email });
 
     if (existingUser || existingAdmin) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    if (role === "admin") {
-      const lastAdmin = await Admin.findOne().sort({ adminID: -1 });
-      const nextAdminID = lastAdmin && lastAdmin.adminID != null ? lastAdmin.adminID + 1 : 1;
+    // Find the highest userID
+    const highestUser = await User.findOne({}, { userID: 1 }).sort({ userID: -1 });
+    let nextUserID = 1;
 
-      const newAdmin = new Admin({
-        email,
-        role,
-        name,
-        picture,
-        department,
-        adminID: nextAdminID,
-      });
+    if (highestUser) {
+      // Get all userIDs and sort them
+      const allUsers = await User.find({}, { userID: 1 }).sort({ userID: 1 });
+      const userIDs = allUsers.map(user => user.userID);
 
-      newAdmin.generateGoogleId();
-      await newAdmin.save();
-
-      return res.status(201).json({ message: "Admin registered successfully", admin: newAdmin });
-    } else {
-      const lastUser = await User.findOne().sort({ userID: -1 });
-      const nextUserID = lastUser && lastUser.userID != null ? lastUser.userID + 1 : 1;
-
-      const newUser = new User({
-        email,
-        role,
-        name,
-        picture,
-        department,
-        userID: nextUserID,
-      });
-
-      newUser.generateGoogleId();
-      await newUser.save();
-
-      return res.status(201).json({ message: "User registered successfully", user: newUser });
+      // Find the first available gap in the sequence
+      nextUserID = findNextAvailableID(userIDs);
     }
+
+    // Double check that this ID is not in use
+    const existingUserWithID = await User.findOne({ userID: nextUserID });
+    if (existingUserWithID) {
+      // If somehow the ID is taken, find the next truly available ID
+      const allUsers = await User.find({}, { userID: 1 }).sort({ userID: 1 });
+      const userIDs = allUsers.map(user => user.userID);
+      nextUserID = Math.max(...userIDs) + 1;
+    }
+
+    const newUser = new User({
+      email,
+      role: 'user',
+      name,
+      department,
+      userID: nextUserID
+    });
+
+    await newUser.save();
+    return res.status(201).json({ message: "User created successfully", user: newUser });
+
   } catch (error) {
     console.error("Error creating user:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "A user with this ID already exists. Please try again."
+      });
+    }
     res.status(500).json({ message: "Server error" });
   }
+};
+
+// Helper function to find the next available ID
+const findNextAvailableID = (ids) => {
+  if (ids.length === 0) return 1;
+
+  ids.sort((a, b) => a - b);
+  let expectedID = 1;
+
+  for (const id of ids) {
+    if (id !== expectedID) {
+      return expectedID;
+    }
+    expectedID++;
+  }
+
+  return expectedID;
 };
 
 // Fetch all users
@@ -135,8 +156,50 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// New method for handling user creation from transfer
+const createUserFromTransfer = async (req, res) => {
+  const { email, name, department, transferFromId, originalRole } = req.body;
+
+  try {
+    // Skip email check if it's a transfer
+    if (originalRole !== 'admin') {
+      return res.status(400).json({ message: "Invalid transfer request" });
+    }
+
+    // Find the highest userID
+    const highestUser = await User.findOne({}, { userID: 1 }).sort({ userID: -1 });
+    let nextUserID = 1;
+
+    if (highestUser) {
+      const allUsers = await User.find({}, { userID: 1 }).sort({ userID: 1 });
+      const userIDs = allUsers.map(user => user.userID);
+      nextUserID = findNextAvailableID(userIDs);
+    }
+
+    const newUser = new User({
+      email,
+      role: 'user',
+      name,
+      department,
+      userID: nextUserID
+    });
+
+    await newUser.save();
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully from transfer",
+      user: newUser
+    });
+
+  } catch (error) {
+    console.error("Error creating user from transfer:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createUser,
+  createUserFromTransfer,
   getAllUsers,
   getUserById,
   searchUsersByName,

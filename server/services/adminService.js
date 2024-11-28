@@ -1,4 +1,5 @@
 const Admin = require("../models/Admin");
+const User = require("../models/User");
 
 const getAllAdmins = async (req, res) => {
     try {
@@ -12,34 +13,62 @@ const getAllAdmins = async (req, res) => {
 
 // Create a new admin
 const createAdmin = async (req, res) => {
-    const { email, name, picture, department } = req.body;
+    const { email, name, department } = req.body;
 
     try {
+        // Check if email exists in either collection
+        const existingUser = await User.findOne({ email });
         const existingAdmin = await Admin.findOne({ email });
 
-        if (existingAdmin) {
-            return res.status(400).json({ message: "Admin already exists" });
+        if (existingUser || existingAdmin) {
+            return res.status(400).json({ message: "Email already exists" });
         }
 
-        const lastAdmin = await Admin.findOne().sort({ adminID: -1 });
-        const nextAdminID = lastAdmin && lastAdmin.adminID != null ? lastAdmin.adminID + 1 : 1;
+        // Find the highest adminID
+        const highestAdmin = await Admin.findOne({}, { adminID: 1 }).sort({ adminID: -1 });
+        let nextAdminID = 1;
+
+        if (highestAdmin) {
+            // Get all adminIDs and sort them
+            const allAdmins = await Admin.find({}, { adminID: 1 }).sort({ adminID: 1 });
+            const adminIDs = allAdmins.map(admin => admin.adminID);
+
+            // Find the first available gap in the sequence
+            nextAdminID = findNextAvailableID(adminIDs);
+        }
 
         const newAdmin = new Admin({
             email,
+            role: 'admin',
             name,
-            picture,
             department,
-            adminID: nextAdminID,
+            adminID: nextAdminID
         });
 
-        newAdmin.generateGoogleId();
         await newAdmin.save();
+        return res.status(201).json({ message: "Admin created successfully", admin: newAdmin });
 
-        res.status(201).json({ message: "Admin registered successfully", admin: newAdmin });
     } catch (error) {
         console.error("Error creating admin:", error);
         res.status(500).json({ message: "Server error" });
     }
+};
+
+// Helper function to find the next available ID
+const findNextAvailableID = (ids) => {
+    if (ids.length === 0) return 1;
+
+    ids.sort((a, b) => a - b);
+    let expectedID = 1;
+
+    for (const id of ids) {
+        if (id !== expectedID) {
+            return expectedID;
+        }
+        expectedID++;
+    }
+
+    return expectedID;
 };
 
 // Update admin information by adminID
@@ -86,9 +115,51 @@ const deleteAdmin = async (req, res) => {
     }
 };
 
+// New method for handling admin creation from transfer
+const createAdminFromTransfer = async (req, res) => {
+    const { email, name, department, transferFromId, originalRole } = req.body;
+
+    try {
+        // Skip email check if it's a transfer
+        if (originalRole !== 'user') {
+            return res.status(400).json({ message: "Invalid transfer request" });
+        }
+
+        // Find the highest adminID
+        const highestAdmin = await Admin.findOne({}, { adminID: 1 }).sort({ adminID: -1 });
+        let nextAdminID = 1;
+
+        if (highestAdmin) {
+            const allAdmins = await Admin.find({}, { adminID: 1 }).sort({ adminID: 1 });
+            const adminIDs = allAdmins.map(admin => admin.adminID);
+            nextAdminID = findNextAvailableID(adminIDs);
+        }
+
+        const newAdmin = new Admin({
+            email,
+            role: 'admin',
+            name,
+            department,
+            adminID: nextAdminID
+        });
+
+        await newAdmin.save();
+        return res.status(201).json({
+            success: true,
+            message: "Admin created successfully from transfer",
+            admin: newAdmin
+        });
+
+    } catch (error) {
+        console.error("Error creating admin from transfer:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 module.exports = {
     getAllAdmins,
     createAdmin,
+    createAdminFromTransfer,
     updateAdmin,
     deleteAdmin,
 };
