@@ -260,6 +260,41 @@ const uploadDocumentFile = async (req, res) => {
   }
 };
 
+// Add this new service method
+const getUserDocuments = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email parameter is required"
+      });
+    }
+
+    const documents = await Document.find({
+      email: email,
+      isArchived: { $ne: true }
+    }).sort({ createdAt: -1 });
+
+    // console.log(`Found ${documents.length} documents for email: ${email}`);
+
+    return res.status(200).json({
+      success: true,
+      count: documents.length,
+      data: documents
+    });
+
+  } catch (error) {
+    console.error("Error in getUserDocuments:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching user documents",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getDocuments,
   requestDocument,
@@ -271,4 +306,5 @@ module.exports = {
   getArchivedDocuments,
   unarchiveDocument,
   uploadDocumentFile,
+  getUserDocuments,
 };

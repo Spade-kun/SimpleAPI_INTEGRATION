@@ -54,64 +54,56 @@ function UserDocuments() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState(null);
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem("sessionToken");
     const userInfo = sessionStorage.getItem("userInfo");
-    const welcomeShown = sessionStorage.getItem("welcomeShown");
 
     if (!token) {
       navigate("/login");
-    } else {
-      if (userInfo) {
-        const user = JSON.parse(userInfo);
-        setUserName(user.name);
-        if (welcomeShown !== "true") {
-          Swal.fire({
-            title: `Welcome ${user.name}! 👋`,
-            text: "We're glad to have you back",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            background: "#fff",
-            customClass: {
-              popup: "animated fadeInDown",
-              title: "swal2-title",
-              content: "swal2-content",
-              timerProgressBar: "swal2-timer-progress-bar",
-            },
-            didOpen: (toast) => {
-              toast.addEventListener("mouseenter", Swal.stopTimer);
-              toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-          });
-          sessionStorage.setItem("welcomeShown", "true");
-        }
-      }
-
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (decodedToken.exp < currentTime) {
-        sessionStorage.removeItem("sessionToken");
-        navigate("/login");
-      }
+      return;
     }
 
-    fetchDocuments();
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      setUserName(user.name);
+      setUserEmail(user.email);
+
+      setFormData(prevState => ({
+        ...prevState,
+        email: user.email
+      }));
+
+      fetchUserDocuments(user.email);
+    }
   }, [navigate]);
 
-  const fetchDocuments = async () => {
+  const fetchUserDocuments = async (email) => {
     try {
-      const response = await fetch("http://localhost:3000/documents/");
-      if (response.ok) {
-        const data = await response.json();
-        setDocuments(data);
-      } else {
-        console.error("Failed to fetch documents");
+      if (!email) {
+        console.error("No email provided");
+        return;
       }
+
+      const response = await fetch(`http://localhost:3000/documents/user/${email}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log(`Fetched ${result.count} documents for ${email}`);
+        setDocuments(result.data);
+      } else {
+        throw new Error(result.message || "Failed to fetch documents");
+      }
+
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error fetching user documents:", error);
+      toast.error("Failed to load documents: " + error.message);
     }
   };
 
@@ -141,84 +133,28 @@ function UserDocuments() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = sessionStorage.getItem("sessionToken");
-    if (!token) {
-      Swal.fire({
-        icon: "error",
-        title: "Authentication Error",
-        text: "Please login first",
-      });
-      navigate("/login");
-      return;
-    }
-
-    // Validate form data
-    if (
-      !formData.email ||
-      !formData.title ||
-      !formData.content ||
-      !formData.department
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Information",
-        text: "Please fill in all fields",
-      });
-      return;
-    }
-
     try {
-      // Show loading state
-      Swal.fire({
-        title: "Submitting Request",
-        text: "Please wait...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
       const response = await fetch("http://localhost:3000/documents/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          email: userEmail
+        }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        // Close loading state and show success message
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Document request submitted successfully!",
-          showConfirmButton: true,
-          timer: 3000,
-          timerProgressBar: true,
-        }).then(() => {
-          setIsModalOpen(false);
-          setFormData({
-            email: "",
-            title: "",
-            content: "",
-            department: "",
-            status: "Pending",
-          });
-          fetchDocuments();
-        });
+        setIsModalOpen(false);
+        fetchUserDocuments(userEmail);
+        toast.success("Document submitted successfully!");
       } else {
-        throw new Error(data.message || "Failed to submit request");
+        toast.error("Failed to submit document");
       }
     } catch (error) {
       console.error("Error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Submission Failed",
-        text: error.message || "Failed to submit request. Please try again.",
-      });
+      toast.error("Error submitting document");
     }
   };
 
@@ -241,8 +177,6 @@ function UserDocuments() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const token = sessionStorage.getItem("sessionToken");
-
     try {
       const response = await fetch(
         `http://localhost:3000/documents/${editingDocument.docID}`,
@@ -250,7 +184,6 @@ function UserDocuments() {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(editingDocument),
         }
@@ -258,120 +191,67 @@ function UserDocuments() {
 
       if (response.ok) {
         setIsEditModalOpen(false);
-        setEditingDocument(null);
-        fetchDocuments();
-        Swal.fire(
-          "Updated!",
-          "Document has been updated successfully.",
-          "success"
-        );
+        fetchUserDocuments(userEmail);
+        toast.success("Document updated successfully!");
       } else {
-        const error = await response.json();
-        Swal.fire(
-          "Error!",
-          error.message || "Failed to update document",
-          "error"
-        );
+        toast.error("Failed to update document");
       }
     } catch (error) {
       console.error("Error:", error);
-      Swal.fire("Error!", "Failed to update document", "error");
+      toast.error("Error updating document");
     }
   };
 
   const handleDelete = async (docID) => {
-    Swal.fire({
-      title: "Cancel Document",
-      text: "Are you sure you want to cancel this document request?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, cancel it!",
-      cancelButtonText: "No, keep it",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const token = sessionStorage.getItem("sessionToken");
-        try {
-          const response = await fetch(
-            `http://localhost:3000/documents/${docID}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+    try {
+      const result = await Swal.fire({
+        title: "Cancel Document",
+        text: "Are you sure you want to cancel this document request?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, cancel it!",
+        cancelButtonText: "No, keep it",
+      });
 
-          if (response.ok) {
-            Swal.fire(
-              "Cancelled!",
-              "Your document request has been cancelled.",
-              "success"
-            );
-            fetchDocuments();
-          } else {
-            const error = await response.json();
-            Swal.fire(
-              "Error!",
-              error.message || "Failed to cancel document",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          Swal.fire("Error!", "Failed to cancel document", "error");
+      if (result.isConfirmed) {
+        const response = await fetch(`http://localhost:3000/documents/${docID}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          fetchUserDocuments(userEmail);
+          toast.success("Document deleted successfully!");
+        } else {
+          toast.error("Failed to delete document");
         }
       }
-    });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Error deleting document");
+    }
   };
 
   const handleArchive = async (docID) => {
-    Swal.fire({
-      title: "Archive Document",
-      text: "Are you sure you want to archive this document?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, archive it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const token = sessionStorage.getItem("sessionToken");
-        try {
-          const response = await fetch(
-            `http://localhost:3000/documents/archive/${docID}`,
-            {
-              method: "PATCH",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            // Remove the archived document from the current documents list
-            setDocuments(documents.filter((doc) => doc.docID !== docID));
-
-            Swal.fire(
-              "Archived!",
-              "Your document has been archived.",
-              "success"
-            );
-          } else {
-            const error = await response.json();
-            Swal.fire(
-              "Error!",
-              error.message || "Failed to archive document",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          Swal.fire("Error!", "Failed to archive document", "error");
+    try {
+      const response = await fetch(
+        `http://localhost:3000/documents/archive/${docID}`,
+        {
+          method: "PATCH",
         }
+      );
+
+      if (response.ok) {
+        fetchUserDocuments(userEmail);
+        toast.success("Document archived successfully!");
+      } else {
+        toast.error("Failed to archive document");
       }
-    });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Error archiving document");
+    }
   };
 
   const columns = [
@@ -510,54 +390,52 @@ function UserDocuments() {
           {/* Modal for document request */}
           <Modal
             isOpen={isModalOpen}
-            onRequestClose={handleCloseModal}
+            onRequestClose={() => setIsModalOpen(false)}
             style={customStyles}
             contentLabel="Request Document Modal"
           >
             <div className="modal-header">
               <h2>Request Document</h2>
-              <button onClick={handleCloseModal} className="close-button">
+              <button onClick={() => setIsModalOpen(false)} className="close-button">
                 &times;
               </button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div>
+              <div className="form-group">
                 <label>Email:</label>
                 <input
                   type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
+                  value={userEmail}
+                  readOnly
+                  className="form-control readonly-input"
                 />
               </div>
-              <div>
+              <div className="form-group">
                 <label>Title:</label>
                 <input
                   type="text"
-                  name="title"
                   value={formData.title}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
+                  className="form-control"
                 />
               </div>
-              <div>
+              <div className="form-group">
                 <label>Content:</label>
                 <textarea
-                  name="content"
                   value={formData.content}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   required
-                ></textarea>
+                  className="form-control"
+                />
               </div>
-              <div>
+              <div className="form-group">
                 <label>Department:</label>
                 <select
-                  name="department"
                   value={formData.department}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                   required
-                  className="department-select"
+                  className="form-control"
                 >
                   <option value="">Select Department</option>
                   {departments.map((dept, index) => (
@@ -567,9 +445,13 @@ function UserDocuments() {
                   ))}
                 </select>
               </div>
-              <div className="button-group">
-                <button type="submit">Submit</button>
-                <button type="button" onClick={handleCloseModal}>
+              <div className="modal-buttons">
+                <button type="submit" className="custom-btn">Submit</button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="custom-btn1"
+                >
                   Cancel
                 </button>
               </div>

@@ -10,6 +10,7 @@ const {
   getArchivedDocuments,
   unarchiveDocument,
   uploadDocumentFile,
+  getUserDocuments
 } = require("../services/documentService");
 const multer = require('multer');
 const path = require('path');
@@ -58,6 +59,7 @@ router.get("/archived", getArchivedDocuments);
 // Upload a file for a document
 router.post('/:docID/upload', upload.single('file'), uploadDocumentFile);
 
-
+// Get documents for specific user
+router.get("/user/:email", getUserDocuments);
 
 module.exports = router;
