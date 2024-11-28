@@ -58,6 +58,7 @@ function Users() {
   const fetchUsers = async () => {
     try {
       const response = await axios.get("http://localhost:3000/users/");
+      console.log("Fetched Users:", response.data); // Log the fetched users
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -67,6 +68,7 @@ function Users() {
   const fetchAdmins = async () => {
     try {
       const response = await axios.get("http://localhost:3000/admins/");
+      console.log("Fetched Admins:", response.data); // Log the fetched admins
       setAdmins(response.data);
     } catch (error) {
       console.error("Error fetching admins:", error);
@@ -102,30 +104,38 @@ function Users() {
       const response = await axios.get(`http://localhost:3000/lock/edit_user`);
       if (response.data.isLocked) {
         Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently editing this user. Please wait.',
-          background: '#fff',
+          icon: "warning",
+          title: "Locked!",
+          text: "Another admin is currently editing this user. Please wait.",
+          background: "#fff",
         });
         return;
       }
 
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: true, userID: id });
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: true,
+        userID: id,
+      });
       setEditUser(user);
       setIsEditModalOpen(true);
     } catch (error) {
-      console.error('Error checking lock status:', error);
+      console.error("Error checking lock status:", error);
     }
   };
 
   const confirmEditUser = async () => {
     try {
       const id = editUser.userID || editUser.adminID;
-      const endpoint = editUser.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
+      const endpoint =
+        editUser.role === "admin"
+          ? `http://localhost:3000/admins/${id}`
+          : `http://localhost:3000/users/${id}`;
       await axios.patch(endpoint, editUser);
       fetchUsers();
       fetchAdmins();
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: false,
+      });
       setIsEditModalOpen(false);
       Swal.fire({
         icon: "success",
@@ -151,28 +161,35 @@ function Users() {
 
   const cancelEditUser = async () => {
     try {
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: false,
+      });
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error('Error unlocking edit user:', error);
+      console.error("Error unlocking edit user:", error);
     }
   };
 
   const handleDeleteUser = async (user) => {
     try {
       const id = user.userID || user.adminID;
-      const response = await axios.get(`http://localhost:3000/lock/delete_user`);
+      const response = await axios.get(
+        `http://localhost:3000/lock/delete_user`
+      );
       if (response.data.isLocked) {
         Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently deleting this user. Please wait.',
-          background: '#fff',
+          icon: "warning",
+          title: "Locked!",
+          text: "Another admin is currently deleting this user. Please wait.",
+          background: "#fff",
         });
         return;
       }
 
-      await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: true, userID: id });
+      await axios.patch(`http://localhost:3000/lock/delete_user`, {
+        isLocked: true,
+        userID: id,
+      });
 
       Swal.fire({
         title: "Are you sure?",
@@ -188,7 +205,10 @@ function Users() {
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const endpoint = user.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
+          const endpoint =
+            user.role === "admin"
+              ? `http://localhost:3000/admins/${id}`
+              : `http://localhost:3000/users/${id}`;
 
           try {
             await axios.delete(endpoint);
@@ -206,7 +226,12 @@ function Users() {
               },
             });
           } catch (deleteError) {
-            console.error('Error deleting user:', deleteError.response ? deleteError.response.data : deleteError.message);
+            console.error(
+              "Error deleting user:",
+              deleteError.response
+                ? deleteError.response.data
+                : deleteError.message
+            );
             Swal.fire({
               icon: "error",
               title: "Error!",
@@ -214,35 +239,41 @@ function Users() {
               background: "#fff",
             });
           } finally {
-            await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
+            await axios.patch(`http://localhost:3000/lock/delete_user`, {
+              isLocked: false,
+            });
           }
         } else {
-          await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
+          await axios.patch(`http://localhost:3000/lock/delete_user`, {
+            isLocked: false,
+          });
         }
       });
     } catch (error) {
-      console.error('Error checking lock status:', error);
+      console.error("Error checking lock status:", error);
     }
   };
 
   const handleAddUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/lock/add_user');
+      const response = await axios.get("http://localhost:3000/lock/add_user");
       if (response.data.isLocked) {
         Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently adding a user. Please wait.',
-          background: '#fff',
+          icon: "warning",
+          title: "Locked!",
+          text: "Another admin is currently adding a user. Please wait.",
+          background: "#fff",
         });
         return;
       }
 
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: true });
+      await axios.patch("http://localhost:3000/lock/add_user", {
+        isLocked: true,
+      });
       setNewUser({ email: "", name: "", role: "", department: "" });
       setIsAddModalOpen(true);
     } catch (error) {
-      console.error('Error checking lock status:', error);
+      console.error("Error checking lock status:", error);
     }
   };
 
@@ -269,7 +300,9 @@ function Users() {
         fetchUsers();
       }
 
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
+      await axios.patch("http://localhost:3000/lock/add_user", {
+        isLocked: false,
+      });
       setIsAddModalOpen(false);
 
       Swal.fire({
@@ -296,10 +329,12 @@ function Users() {
 
   const cancelAddUser = async () => {
     try {
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
+      await axios.patch("http://localhost:3000/lock/add_user", {
+        isLocked: false,
+      });
       setIsAddModalOpen(false);
     } catch (error) {
-      console.error('Error unlocking add user:', error);
+      console.error("Error unlocking add user:", error);
     }
   };
 
@@ -315,10 +350,7 @@ function Users() {
           <button onClick={() => handleEditUser(row)} className="custom-btn2">
             Edit
           </button>
-          <button
-            onClick={() => handleDeleteUser(row)}
-            className="custom-btn1"
-          >
+          <button onClick={() => handleDeleteUser(row)} className="custom-btn1">
             Delete
           </button>
         </div>
@@ -343,10 +375,7 @@ function Users() {
           <button onClick={() => handleEditUser(row)} className="custom-btn2">
             Edit
           </button>
-          <button
-            onClick={() => handleDeleteUser(row)}
-            className="custom-btn1"
-          >
+          <button onClick={() => handleDeleteUser(row)} className="custom-btn1">
             Delete
           </button>
         </div>
@@ -387,8 +416,9 @@ function Users() {
         <AdminSidebar isOpen={isSidebarOpen} />
 
         <div
-          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
-            }`}
+          className={`admin-content ${
+            isSidebarOpen ? "with-sidebar" : "without-sidebar"
+          }`}
           style={{ overflowY: "auto", maxHeight: "100vh" }}
         >
           <div className="admin-header">
@@ -501,10 +531,7 @@ function Users() {
                   <button onClick={confirmEditUser} className="custom-btn">
                     Confirm
                   </button>
-                  <button
-                    onClick={cancelEditUser}
-                    className="custom-btn1"
-                  >
+                  <button onClick={cancelEditUser} className="custom-btn1">
                     Cancel
                   </button>
                 </div>
@@ -570,10 +597,7 @@ function Users() {
                   <button onClick={confirmAddUser} className="custom-btn">
                     Confirm
                   </button>
-                  <button
-                    onClick={cancelAddUser}
-                    className="custom-btn1"
-                  >
+                  <button onClick={cancelAddUser} className="custom-btn1">
                     Cancel
                   </button>
                 </div>
