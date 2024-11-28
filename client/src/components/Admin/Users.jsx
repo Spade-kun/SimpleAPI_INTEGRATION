@@ -47,6 +47,9 @@ function Users() {
     role: "",
     department: "",
   });
+  const [editingUsers, setEditingUsers] = useState({});
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [lockTimer, setLockTimer] = useState(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -73,6 +76,27 @@ function Users() {
     }
   };
 
+  // Fetch the current editing status periodically
+  const fetchEditingStatus = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/lock/edit_user");
+      if (response.data.isLocked && response.data.userID) {
+        setEditingUserId(response.data.userID);
+      } else {
+        setEditingUserId(null);
+      }
+    } catch (error) {
+      console.error("Error fetching editing status:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEditingStatus();
+    const intervalId = setInterval(fetchEditingStatus, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     const userInfo = sessionStorage.getItem("userInfo");
     const welcomeShown = localStorage.getItem("welcomeShown");
@@ -96,37 +120,101 @@ function Users() {
     fetchAdmins();
   }, []);
 
+  // Function to handle auto-unlock
+  const startLockTimer = () => {
+    if (lockTimer) {
+      clearTimeout(lockTimer);
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        await axios.patch(`http://localhost:3000/lock/edit_user`, {
+          isLocked: false,
+          userID: null
+        });
+        setEditingUserId(null);
+        setIsEditModalOpen(false);
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Lock Expired',
+          text: 'The edit lock has expired due to inactivity.',
+          background: '#fff',
+        });
+      } catch (error) {
+        console.error('Error releasing lock:', error);
+      }
+    }, 3 * 60 * 1000); // Changed to 3 minutes
+
+    setLockTimer(timer);
+  };
+
   const handleEditUser = async (user) => {
     try {
       const id = user.userID || user.adminID;
       const response = await axios.get(`http://localhost:3000/lock/edit_user`);
-      if (response.data.isLocked) {
+
+      if (response.data.isLocked && response.data.userID !== id) {
+        // Calculate remaining time if lock exists
+        const lockTime = new Date(response.data.lockTime);
+        const currentTime = new Date();
+        const remainingMinutes = Math.ceil((3 * 60 * 1000 - (currentTime - lockTime)) / 1000 / 60);
+
         Swal.fire({
           icon: 'warning',
           title: 'Locked!',
-          text: 'Another admin is currently editing this user. Please wait.',
+          text: `Another admin is currently editing a user. Please wait. Lock expires in ${remainingMinutes} minutes.`,
           background: '#fff',
         });
         return;
       }
 
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: true, userID: id });
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: true,
+        userID: id
+      });
+
       setEditUser(user);
+      setEditingUserId(id);
       setIsEditModalOpen(true);
+
+      // Start the lock timer
+      startLockTimer();
+
     } catch (error) {
       console.error('Error checking lock status:', error);
     }
   };
 
+  // Modified confirmEditUser function
   const confirmEditUser = async () => {
     try {
       const id = editUser.userID || editUser.adminID;
-      const endpoint = editUser.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
+      const endpoint = editUser.role === "admin"
+        ? `http://localhost:3000/admins/${id}`
+        : `http://localhost:3000/users/${id}`;
+
       await axios.patch(endpoint, editUser);
+
+      // Clear the lock timer
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        setLockTimer(null);
+      }
+
+      // Release the lock
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: false,
+        userID: null
+      });
+
+      setIsEditModalOpen(false);
+      setEditingUserId(null);
+      setEditUser(null);
+
       fetchUsers();
       fetchAdmins();
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
-      setIsEditModalOpen(false);
+
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -134,9 +222,6 @@ function Users() {
         timer: 1500,
         showConfirmButton: false,
         background: "#fff",
-        customClass: {
-          popup: "animated fadeInDown",
-        },
       });
     } catch (error) {
       console.error("Error updating user:", error);
@@ -149,32 +234,43 @@ function Users() {
     }
   };
 
+  // Modified cancelEditUser function
   const cancelEditUser = async () => {
     try {
-      await axios.patch(`http://localhost:3000/lock/edit_user`, { isLocked: false });
+      // Clear the lock timer
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        setLockTimer(null);
+      }
+
+      // Release the lock
+      await axios.patch(`http://localhost:3000/lock/edit_user`, {
+        isLocked: false,
+        userID: null
+      });
+
       setIsEditModalOpen(false);
+      setEditingUserId(null);
+      setEditUser(null);
     } catch (error) {
-      console.error('Error unlocking edit user:', error);
+      console.error('Error canceling edit:', error);
     }
   };
 
   const handleDeleteUser = async (user) => {
-    try {
-      const id = user.userID || user.adminID;
-      const response = await axios.get(`http://localhost:3000/lock/delete_user`);
-      if (response.data.isLocked) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently deleting this user. Please wait.',
-          background: '#fff',
-        });
-        return;
-      }
-
-      await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: true, userID: id });
-
+    // Check if user is being edited first
+    if (editingUserId !== null) {
       Swal.fire({
+        icon: 'warning',
+        title: 'Cannot Delete',
+        text: 'This user is currently being edited. Please wait until editing is complete.',
+        background: '#fff',
+      });
+      return;
+    }
+
+    try {
+      const result = await Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
         icon: "warning",
@@ -183,124 +279,111 @@ function Users() {
         cancelButtonColor: "#d33",
         confirmButtonText: "Yes, delete it!",
         background: "#fff",
-        customClass: {
-          popup: "animated fadeInDown",
-        },
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          const endpoint = user.role === "admin" ? `http://localhost:3000/admins/${id}` : `http://localhost:3000/users/${id}`;
-
-          try {
-            await axios.delete(endpoint);
-            fetchUsers();
-            fetchAdmins();
-            Swal.fire({
-              icon: "success",
-              title: "Deleted!",
-              text: "User has been deleted.",
-              timer: 1500,
-              showConfirmButton: false,
-              background: "#fff",
-              customClass: {
-                popup: "animated fadeInDown",
-              },
-            });
-          } catch (deleteError) {
-            console.error('Error deleting user:', deleteError.response ? deleteError.response.data : deleteError.message);
-            Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: "Failed to delete user.",
-              background: "#fff",
-            });
-          } finally {
-            await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
-          }
-        } else {
-          await axios.patch(`http://localhost:3000/lock/delete_user`, { isLocked: false });
-        }
-      });
-    } catch (error) {
-      console.error('Error checking lock status:', error);
-    }
-  };
-
-  const handleAddUser = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/lock/add_user');
-      if (response.data.isLocked) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
-          text: 'Another admin is currently adding a user. Please wait.',
-          background: '#fff',
-        });
-        return;
-      }
-
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: true });
-      setNewUser({ email: "", name: "", role: "", department: "" });
-      setIsAddModalOpen(true);
-    } catch (error) {
-      console.error('Error checking lock status:', error);
-    }
-  };
-
-  const confirmAddUser = async () => {
-    try {
-      Swal.fire({
-        title: "Adding User",
-        text: "Please wait...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
       });
 
-      const endpoint =
-        newUser.role === "admin"
-          ? "http://localhost:3000/admins/register"
-          : "http://localhost:3000/users/register";
-      await axios.post(endpoint, newUser);
+      if (result.isConfirmed) {
+        const id = user.userID || user.adminID;
+        const endpoint = user.role === "admin"
+          ? `http://localhost:3000/admins/${id}`
+          : `http://localhost:3000/users/${id}`;
 
-      if (newUser.role === "admin") {
-        fetchAdmins();
-      } else {
+        await axios.delete(endpoint);
         fetchUsers();
-      }
+        fetchAdmins();
 
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
+        Swal.fire({
+          title: "Deleted!",
+          text: "User has been deleted.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+          background: "#fff",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to delete user.",
+        background: "#fff",
+      });
+    }
+  };
+
+  const handleAddUser = async (userData) => {
+    try {
+      // No need to check locks for adding users
+      const endpoint = userData.role === "admin"
+        ? "http://localhost:3000/admins"
+        : "http://localhost:3000/users";
+
+      await axios.post(endpoint, userData);
+      fetchUsers();
+      fetchAdmins();
       setIsAddModalOpen(false);
 
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "New user added successfully!",
+        text: "User added successfully!",
         timer: 1500,
         showConfirmButton: false,
         background: "#fff",
-        customClass: {
-          popup: "animated fadeInDown",
-        },
       });
     } catch (error) {
       console.error("Error adding user:", error);
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: "Failed to add new user.",
+        text: "Failed to add user.",
         background: "#fff",
       });
     }
   };
 
-  const cancelAddUser = async () => {
-    try {
-      await axios.patch('http://localhost:3000/lock/add_user', { isLocked: false });
-      setIsAddModalOpen(false);
-    } catch (error) {
-      console.error('Error unlocking add user:', error);
-    }
+  const renderActionButtons = (row) => {
+    const id = row.userID || row.adminID;
+    const isLocked = editingUserId !== null;
+    const isCurrentlyEditing = editingUserId === id;
+    const isBeingEdited = isLocked && editingUserId === id;
+
+    return (
+      <div className="action-buttons">
+        {isLocked ? (
+          <button
+            className="lock-icon-btn"
+            disabled
+            title={isCurrentlyEditing ? "You are currently editing this user" : "Another admin is editing a user"}
+          >
+            🔒
+          </button>
+        ) : (
+          <button
+            onClick={() => handleEditUser(row)}
+            className="custom-btn2"
+          >
+            Edit
+          </button>
+        )}
+        <button
+          onClick={() => handleDeleteUser(row)}
+          className="custom-btn1"
+          disabled={isLocked} // Disable delete button when any user is being edited
+          style={{
+            opacity: isLocked ? 0.5 : 1,
+            cursor: isLocked ? 'not-allowed' : 'pointer'
+          }}
+        >
+          Delete
+        </button>
+        {isBeingEdited && (
+          <span className="editing-indicator" title="Currently being edited">
+            ✏️
+          </span>
+        )}
+      </div>
+    );
   };
 
   const columns = [
@@ -310,19 +393,7 @@ function Users() {
     { name: "Department", selector: (row) => row.department, sortable: true },
     {
       name: "Actions",
-      cell: (row) => (
-        <div>
-          <button onClick={() => handleEditUser(row)} className="custom-btn2">
-            Edit
-          </button>
-          <button
-            onClick={() => handleDeleteUser(row)}
-            className="custom-btn1"
-          >
-            Delete
-          </button>
-        </div>
-      ),
+      cell: renderActionButtons,
     },
   ];
 
@@ -338,19 +409,7 @@ function Users() {
     { name: "Department", selector: (row) => row.department, sortable: true },
     {
       name: "Actions",
-      cell: (row) => (
-        <div>
-          <button onClick={() => handleEditUser(row)} className="custom-btn2">
-            Edit
-          </button>
-          <button
-            onClick={() => handleDeleteUser(row)}
-            className="custom-btn1"
-          >
-            Delete
-          </button>
-        </div>
-      ),
+      cell: renderActionButtons,
     },
   ];
 
@@ -397,7 +456,7 @@ function Users() {
           </div>
 
           <div className="admin-controls">
-            <button onClick={handleAddUser} className="custom-btn">
+            <button onClick={() => setIsAddModalOpen(true)} className="custom-btn">
               Add User
             </button>
             <input
@@ -516,7 +575,7 @@ function Users() {
           {isAddModalOpen && (
             <Modal
               isOpen={isAddModalOpen}
-              onRequestClose={cancelAddUser}
+              onRequestClose={() => setIsAddModalOpen(false)}
               style={customStyles}
               className="modal-content"
             >
@@ -567,11 +626,11 @@ function Users() {
                   ))}
                 </select>
                 <div className="modal-buttons">
-                  <button onClick={confirmAddUser} className="custom-btn">
+                  <button onClick={handleAddUser} className="custom-btn">
                     Confirm
                   </button>
                   <button
-                    onClick={cancelAddUser}
+                    onClick={() => setIsAddModalOpen(false)}
                     className="custom-btn1"
                   >
                     Cancel

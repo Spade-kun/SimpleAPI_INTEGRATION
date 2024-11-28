@@ -248,6 +248,7 @@ html {
 
 /* Responsive Styles */
 @media screen and (max-width: 768px) {
+
   .admin-container.with-sidebar,
   .admin-container.without-sidebar {
     margin-left: 0;
@@ -263,6 +264,7 @@ html {
 }
 
 @media screen and (max-width: 480px) {
+
   .admin-header,
   .admin-controls {
     padding: 15px;

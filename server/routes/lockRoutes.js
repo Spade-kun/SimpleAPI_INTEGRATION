@@ -1,25 +1,46 @@
 const express = require('express');
-const { getLockStatus, setLockStatus } = require('../services/lockService');
-
 const router = express.Router();
 
-router.get('/:button', async (req, res) => {
-    try {
-        const isLocked = await getLockStatus(req.params.button);
-        res.json({ isLocked });
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching lock status' });
+let editLock = {
+    isLocked: false,
+    userID: null,
+    lockTime: null
+};
+
+const LOCK_TIMEOUT = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+// Function to check and clear expired locks
+const checkLockExpiration = () => {
+    if (editLock.isLocked && editLock.lockTime) {
+        const currentTime = Date.now();
+        if (currentTime - editLock.lockTime > LOCK_TIMEOUT) {
+            // Lock has expired
+            editLock = {
+                isLocked: false,
+                userID: null,
+                lockTime: null
+            };
+        }
     }
+};
+
+// Get edit lock status
+router.get('/edit_user', (req, res) => {
+    checkLockExpiration();
+    res.json(editLock);
 });
 
-router.patch('/:button', async (req, res) => {
-    try {
-        const { isLocked } = req.body;
-        const status = await setLockStatus(req.params.button, isLocked);
-        res.json({ isLocked: status });
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating lock status' });
-    }
+// Update edit lock status
+router.patch('/edit_user', (req, res) => {
+    const { isLocked, userID } = req.body;
+
+    editLock = {
+        isLocked,
+        userID,
+        lockTime: isLocked ? Date.now() : null
+    };
+
+    res.json(editLock);
 });
 
 module.exports = router;
