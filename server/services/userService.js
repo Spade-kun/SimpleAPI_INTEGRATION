@@ -31,26 +31,47 @@ const createUser = async (req, res) => {
     console.log("Encrypted Department:", encryptedDepartment);
     console.log("Encrypted Role:", encryptedRole);
 
-    // Find the last user and increment the userID
-    const lastUser = await User.findOne().sort({ userID: -1 });
-    const nextUserID =
-      lastUser && lastUser.userID != null ? parseInt(lastUser.userID) + 1 : 1;
+    if (role === "admin") {
+      const lastAdmin = await Admin.findOne().sort({ adminID: -1 });
+      const nextAdminID =
+        lastAdmin && lastAdmin.adminID != null ? lastAdmin.adminID + 1 : 1;
 
-    const newUser = new User({
-      email: encryptedEmail,
-      role: encryptedRole,
-      name: encryptedName,
-      picture,
-      department: encryptedDepartment,
-      userID: nextUserID.toString(),
-    });
+      const newAdmin = new Admin({
+        email: encryptedEmail,
+        role: encryptedRole,
+        name: encryptedName,
+        picture,
+        department: encryptedDepartment,
+        adminID: nextAdminID.toString(),
+      });
 
-    newUser.generateGoogleId();
-    await newUser.save();
+      newAdmin.generateGoogleId();
+      await newAdmin.save();
 
-    return res
-      .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+      return res
+        .status(201)
+        .json({ message: "Admin registered successfully", admin: newAdmin });
+    } else {
+      const lastUser = await User.findOne().sort({ userID: -1 });
+      const nextUserID =
+        lastUser && lastUser.userID != null ? lastUser.userID + 1 : 1;
+
+      const newUser = new User({
+        email: encryptedEmail,
+        role: encryptedRole,
+        name: encryptedName,
+        picture,
+        department: encryptedDepartment,
+        userID: nextUserID.toString(),
+      });
+
+      newUser.generateGoogleId();
+      await newUser.save();
+
+      return res
+        .status(201)
+        .json({ message: "User registered successfully", user: newUser });
+    }
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ message: "Server error" });

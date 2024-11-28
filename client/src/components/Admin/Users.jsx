@@ -367,6 +367,7 @@ function Users() {
     { name: "AdminID", selector: (row) => row.adminID, sortable: true },
     { name: "Email", selector: (row) => row.email, sortable: true },
     { name: "Name", selector: (row) => row.name, sortable: true },
+    { name: "Role", selector: (row) => row.role, sortable: true },
     { name: "Department", selector: (row) => row.department, sortable: true },
     {
       name: "Actions",

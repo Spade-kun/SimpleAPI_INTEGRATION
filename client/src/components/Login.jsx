@@ -4,9 +4,10 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./components-css/Login.css";
-import { Alert } from '@mui/material';
+import { Alert } from "@mui/material";
 
-const clientId = "96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com";
+const clientId =
+  "96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com";
 const recaptchaKey = "6Lfty3MqAAAAACp-CJm8DFxDW1GfjdR1aXqHbqpg";
 
 function Login() {
@@ -67,37 +68,46 @@ function Login() {
   };
 
   return (
-    <GoogleOAuthProvider clientId={clientId} >
+    <GoogleOAuthProvider clientId={clientId}>
       <div className="login-page">
         <div className="left-section">
           <div className="logo-container">
-            <img src="../src/assets/newbuksu.png" alt="Buksu Logo" className="buksu-logo" />
-            <img src="../src/assets/logo.png" alt="QA Logo" className="qa-logo" />
+            <img
+              src="../src/assets/newbuksu.png"
+              alt="Buksu Logo"
+              className="buksu-logo"
+            />
+            <img
+              src="../src/assets/logo.png"
+              alt="QA Logo"
+              className="qa-logo"
+            />
           </div>
           <h2 className="login-txt">Document Request System</h2>
-          <p className="login-txt1">Quick, easy, and secure: Quality Assurance Office Document Request System</p>
+          <p className="login-txt1">
+            Quick, easy, and secure: Quality Assurance Office Document Request
+            System
+          </p>
         </div>
 
         <div className="right-section">
           <div className="login-card">
             <h3 className="login-txt1">Log in to Your Account</h3>
-            <h5 className="login-txt2">Effortlessly Request Documents Online</h5>
+            <h5 className="login-txt2">
+              Effortlessly Request Documents Online
+            </h5>
             <br />
             {showAlert && (
               <Alert
                 severity="warning"
                 onClose={() => setShowAlert(false)}
-                sx={{ mb: 2, width: '100%' }}
+                sx={{ mb: 2, width: "100%" }}
               >
                 Please complete the reCAPTCHA verification first
               </Alert>
             )}
             <div className="google-login">
-              <GoogleLogin
-                onSuccess={onSuccess}
-                onError={onError}
-                useOneTap
-              />
+              <GoogleLogin onSuccess={onSuccess} onError={onError} useOneTap />
             </div>
             <br />
             <ReCAPTCHA sitekey={recaptchaKey} onChange={onRecaptchaChange} />

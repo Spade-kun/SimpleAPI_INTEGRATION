@@ -10,11 +10,13 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const Admin = require("./models/Admin");
-const { lockResource, unlockResource, isResourceLocked } = require('./services/lockService');
+const {
+  lockResource,
+  unlockResource,
+  isResourceLocked,
+} = require("./services/lockService");
 const lockRoutes = require("./routes/lockRoutes");
-
-
-
+const { decrypt } = require("./services/decryptService");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,12 +73,12 @@ app.get(
     try {
       // Check if the user is an admin
       let user = await Admin.findOne({ email: req.user.email });
-      let role = 'admin';
+      let role = "admin";
 
       if (!user) {
         // If not an admin, check if the user is a regular user
         user = await User.findOne({ email: req.user.email });
-        role = 'user';
+        role = "user";
       }
 
       if (!user) {
@@ -114,6 +116,8 @@ app.get("/admin", jwtVerifyMiddleware, (req, res) => {
 app.post("/login/google", async (req, res) => {
   const { token } = req.body;
 
+  console.log("Received token:", token); // Log the received token
+
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
@@ -121,17 +125,23 @@ app.post("/login/google", async (req, res) => {
     });
     const payload = ticket.getPayload();
 
+    console.log("Token payload:", payload); // Log the token payload
+
     // Extract picture from payload
     const picture = payload.picture;
 
+    // Decrypt the email
+    const decryptedEmail = decrypt(payload.email);
+    console.log("Decrypted Email:", decryptedEmail); // Debugging log
+
     // Check if the user is an admin
-    let user = await Admin.findOne({ email: payload.email });
-    let role = 'admin';
+    let user = await Admin.findOne({ email: decryptedEmail });
+    let role = "admin";
 
     if (!user) {
       // If not an admin, check if the user is a regular user
-      user = await User.findOne({ email: payload.email });
-      role = 'user';
+      user = await User.findOne({ email: decryptedEmail });
+      role = "user";
     }
 
     if (!user) {
@@ -154,7 +164,12 @@ app.post("/login/google", async (req, res) => {
 
     res.json({
       message: "Login successful",
-      user: { name: user.name, email: user.email, role: role, picture: picture || user.picture },
+      user: {
+        name: user.name,
+        email: user.email,
+        role: role,
+        picture: picture || user.picture,
+      },
       token: sessionToken,
       refreshToken: refreshToken,
     });
@@ -210,7 +225,7 @@ app.post("/logout", (req, res) => {
 });
 
 // Serve static files from the 'uploads' directory
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
