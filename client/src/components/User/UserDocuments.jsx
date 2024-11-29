@@ -352,6 +352,34 @@ function UserDocuments() {
     }
   };
 
+  // Add this new function to handle Google Form opening
+  const handleGoogleFormOpen = () => {
+    // Replace this URL with your actual Google Form URL
+    const googleFormUrl = "https://forms.gle/rZqjYHrDLgHqyvBV6";
+    window.open(googleFormUrl, "_blank", "noopener,noreferrer");
+  };
+
+  // Add new function to handle sync
+  const handleSyncFromSheets = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/documents/sync-sheets', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Successfully synced data from Google Sheets!');
+        fetchUserDocuments(userEmail); // Refresh the documents list
+      } else {
+        toast.error('Failed to sync: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast.error('Error syncing from sheets: ' + error.message);
+    }
+  };
+
   return (
     <div className="user-dashboard-container">
       <ToastContainer
@@ -383,9 +411,17 @@ function UserDocuments() {
           <p>
             <i>Welcome! Here you can view and manage your document requests.</i>
           </p>
-          <button onClick={handleOpenModal} className="custom-btn">
-            Request Document
-          </button>
+          <div className="button-container" style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={handleOpenModal} className="custom-btn">
+              Request Document
+            </button>
+            <button onClick={handleGoogleFormOpen} className="custom-btn">
+              Open Google Form
+            </button>
+            <button onClick={handleSyncFromSheets} className="custom-btn">
+              Sync from Sheets
+            </button>
+          </div>
 
           {/* Modal for document request */}
           <Modal

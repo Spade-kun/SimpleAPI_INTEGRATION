@@ -15,6 +15,8 @@ const {
 const multer = require('multer');
 const path = require('path');
 
+const { syncFromSheets } = require('../services/googleSheetsService');
+
 // Configure multer to store files with their original names
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -61,5 +63,20 @@ router.post('/:docID/upload', upload.single('file'), uploadDocumentFile);
 
 // Get documents for specific user
 router.get("/user/:email", getUserDocuments);
+
+
+// Add new route for syncing from sheets
+router.post('/sync-sheets', async (req, res) => {
+  try {
+    const result = await syncFromSheets();
+    if (result.success) {
+      res.json({ success: true, message: result.message });
+    } else {
+      res.status(500).json({ success: false, error: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 module.exports = router;
