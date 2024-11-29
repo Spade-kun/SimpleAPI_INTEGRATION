@@ -1,5 +1,5 @@
 // src/components/AdminSidebar.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button, Badge, ListGroup } from "react-bootstrap";
 import {
@@ -21,6 +21,47 @@ function UserSidebar({ isOpen }) {
   // Retrieve user information from sessionStorage
   const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
   const googlePicture = sessionStorage.getItem("googlePicture");
+
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const userInfo = sessionStorage.getItem("userInfo");
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      setUserEmail(user.email);
+      fetchNotificationCount(user.email);
+
+      // Optional: Set up polling to refresh count
+      const interval = setInterval(
+        () => fetchNotificationCount(user.email),
+        30000
+      );
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  const fetchNotificationCount = async (email) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/documents/user/${email}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Count documents that are either Approved or Rejected
+        const count = result.data.filter(
+          (doc) => doc.status === "Approved" || doc.status === "Rejected"
+        ).length;
+        setNotificationCount(count);
+      }
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+    }
+  };
 
   const handleLogout = () => {
     Swal.fire({
@@ -119,10 +160,25 @@ function UserSidebar({ isOpen }) {
         <ListGroup.Item
           as={Link}
           to="/notifications"
-          className="sidebar-item"
+          className="sidebar-item position-relative"
           action
         >
-          <Bell className="me-3" /> Notifications
+          <Bell className="me-3" />
+          Notifications
+          {notificationCount > 0 && (
+            <Badge
+              bg="danger"
+              className="notification-badge"
+              style={{
+                position: "absolute",
+                right: "10px",
+                borderRadius: "50%",
+                padding: "0.25em 0.6em",
+              }}
+            >
+              {notificationCount}
+            </Badge>
+          )}
         </ListGroup.Item>
       </ListGroup>
 
