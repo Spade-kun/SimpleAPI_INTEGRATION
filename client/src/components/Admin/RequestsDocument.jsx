@@ -4,10 +4,9 @@ import { List, Check2Circle, XCircle } from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 import "../components-css/RequestDocument.css";
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 
 function RequestsDocument() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -21,28 +20,34 @@ function RequestsDocument() {
   const columns = [
     {
       name: "Document ID",
-      selector: row => row.docID,
+      selector: (row) => row.docID,
       sortable: true,
     },
     {
       name: "Title",
-      selector: row => row.title,
+      selector: (row) => row.title,
       sortable: true,
     },
     {
       name: "Department",
-      selector: row => row.department,
+      selector: (row) => row.department,
       sortable: true,
     },
     {
       name: "Requested By",
-      selector: row => row.email,
+      selector: (row) => row.email,
       sortable: true,
     },
     {
       name: "Status",
-      selector: row => row.status,
+      selector: (row) => row.status,
       sortable: true,
+      className: "status-badge",
+      cell: (row) => (
+        <span className={`status-badge ${row.status.toLowerCase()}`}>
+          {row.status}
+        </span>
+      ),
     },
     {
       name: "Actions",
@@ -51,34 +56,34 @@ function RequestsDocument() {
           <button
             className="btn btn-success btn-sm mx-1"
             onClick={() => handleApprove(row.docID)}
-            disabled={row.status !== 'Pending'}
+            disabled={row.status !== "Pending"}
           >
-            <Check2Circle size={16} /> Approve
+            <Check2Circle size={16} />
           </button>
           <button
             className="btn btn-danger btn-sm mx-1"
             onClick={() => handleReject(row.docID)}
-            disabled={row.status !== 'Pending'}
+            disabled={row.status !== "Pending"}
           >
-            <XCircle size={16} /> Reject
+            <XCircle size={16} />
           </button>
         </div>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-    }
+    },
   ];
 
   // Fetch documents from the server
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/documents/');
+      const response = await axios.get("http://localhost:3000/documents/");
       setDocuments(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error("Error fetching documents:", error);
       setLoading(false);
     }
   };
@@ -102,7 +107,7 @@ function RequestsDocument() {
       // Refresh the documents list
       fetchDocuments();
     } catch (error) {
-      console.error('Error rejecting document:', error);
+      console.error("Error rejecting document:", error);
     }
   };
 
@@ -120,20 +125,24 @@ function RequestsDocument() {
     formData.append("file", file);
 
     try {
-      await axios.post(`http://localhost:3000/documents/${selectedDocID}/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      await axios.post(
+        `http://localhost:3000/documents/${selectedDocID}/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-      });
+      );
       setShowModal(false);
       fetchDocuments(); // Refresh the documents list
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error("Error uploading file:", error);
     }
   };
 
   const openGoogleDocs = () => {
-    window.open('https://docs.google.com/document/u/0/', '_blank');
+    window.open("https://docs.google.com/document/u/0/", "_blank");
   };
 
   return (

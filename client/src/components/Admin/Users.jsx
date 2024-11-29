@@ -130,19 +130,19 @@ function Users() {
       try {
         await axios.patch(`http://localhost:3000/lock/edit_user`, {
           isLocked: false,
-          userID: null
+          userID: null,
         });
         setEditingUserId(null);
         setIsEditModalOpen(false);
 
         Swal.fire({
-          icon: 'info',
-          title: 'Lock Expired',
-          text: 'The edit lock has expired due to inactivity.',
-          background: '#fff',
+          icon: "info",
+          title: "Lock Expired",
+          text: "The edit lock has expired due to inactivity.",
+          background: "#fff",
         });
       } catch (error) {
-        console.error('Error releasing lock:', error);
+        console.error("Error releasing lock:", error);
       }
     }, 3 * 60 * 1000); // Changed to 3 minutes
 
@@ -158,20 +158,22 @@ function Users() {
         // Calculate remaining time if lock exists
         const lockTime = new Date(response.data.lockTime);
         const currentTime = new Date();
-        const remainingMinutes = Math.ceil((3 * 60 * 1000 - (currentTime - lockTime)) / 1000 / 60);
+        const remainingMinutes = Math.ceil(
+          (3 * 60 * 1000 - (currentTime - lockTime)) / 1000 / 60
+        );
 
         Swal.fire({
-          icon: 'warning',
-          title: 'Locked!',
+          icon: "warning",
+          title: "Locked!",
           text: `Another admin is currently editing a user. Please wait. Lock expires in ${remainingMinutes} minutes.`,
-          background: '#fff',
+          background: "#fff",
         });
         return;
       }
 
       await axios.patch(`http://localhost:3000/lock/edit_user`, {
         isLocked: true,
-        userID: id
+        userID: id,
       });
 
       // Store the original role when setting up edit
@@ -180,9 +182,8 @@ function Users() {
       setIsEditModalOpen(true);
 
       startLockTimer();
-
     } catch (error) {
-      console.error('Error checking lock status:', error);
+      console.error("Error checking lock status:", error);
     }
   };
 
@@ -198,14 +199,17 @@ function Users() {
           name: editUser.name,
           department: editUser.department,
           role: editUser.role,
-          transferFromId: id,  // Add this to indicate it's a transfer
-          originalRole: editUser.originalRole  // Add this to indicate the original role
+          transferFromId: id, // Add this to indicate it's a transfer
+          originalRole: editUser.originalRole, // Add this to indicate the original role
         };
 
         if (editUser.role === "admin") {
           // Converting from user to admin
           // First, create new admin
-          const adminResponse = await axios.post('http://localhost:3000/admins/transfer', newData);
+          const adminResponse = await axios.post(
+            "http://localhost:3000/admins/transfer",
+            newData
+          );
           if (adminResponse.data.success) {
             // Then delete the user
             await axios.delete(`http://localhost:3000/users/${id}`);
@@ -213,7 +217,10 @@ function Users() {
         } else if (editUser.role === "user") {
           // Converting from admin to user
           // First, create new user
-          const userResponse = await axios.post('http://localhost:3000/users/transfer', newData);
+          const userResponse = await axios.post(
+            "http://localhost:3000/users/transfer",
+            newData
+          );
           if (userResponse.data.success) {
             // Then delete the admin
             await axios.delete(`http://localhost:3000/admins/${id}`);
@@ -221,9 +228,10 @@ function Users() {
         }
       } else {
         // If role is not changing, just update the existing record
-        const endpoint = editUser.role === "admin"
-          ? `http://localhost:3000/admins/${id}`
-          : `http://localhost:3000/users/${id}`;
+        const endpoint =
+          editUser.role === "admin"
+            ? `http://localhost:3000/admins/${id}`
+            : `http://localhost:3000/users/${id}`;
 
         await axios.patch(endpoint, editUser);
       }
@@ -235,7 +243,7 @@ function Users() {
       }
       await axios.patch(`http://localhost:3000/lock/edit_user`, {
         isLocked: false,
-        userID: null
+        userID: null,
       });
 
       setIsEditModalOpen(false);
@@ -277,14 +285,14 @@ function Users() {
       // Release the lock
       await axios.patch(`http://localhost:3000/lock/edit_user`, {
         isLocked: false,
-        userID: null
+        userID: null,
       });
 
       setIsEditModalOpen(false);
       setEditingUserId(null);
       setEditUser(null);
     } catch (error) {
-      console.error('Error canceling edit:', error);
+      console.error("Error canceling edit:", error);
     }
   };
 
@@ -292,10 +300,10 @@ function Users() {
     // Check if user is being edited first
     if (editingUserId !== null) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Cannot Delete',
-        text: 'This user is currently being edited. Please wait until editing is complete.',
-        background: '#fff',
+        icon: "warning",
+        title: "Cannot Delete",
+        text: "This user is currently being edited. Please wait until editing is complete.",
+        background: "#fff",
       });
       return;
     }
@@ -314,9 +322,10 @@ function Users() {
 
       if (result.isConfirmed) {
         const id = user.userID || user.adminID;
-        const endpoint = user.role === "admin"
-          ? `http://localhost:3000/admins/${id}`
-          : `http://localhost:3000/users/${id}`;
+        const endpoint =
+          user.role === "admin"
+            ? `http://localhost:3000/admins/${id}`
+            : `http://localhost:3000/users/${id}`;
 
         await axios.delete(endpoint);
         fetchUsers();
@@ -345,7 +354,12 @@ function Users() {
   const handleAddUser = async () => {
     try {
       // Validate required fields
-      if (!newUser.email || !newUser.name || !newUser.role || !newUser.department) {
+      if (
+        !newUser.email ||
+        !newUser.name ||
+        !newUser.role ||
+        !newUser.department
+      ) {
         Swal.fire({
           icon: "warning",
           title: "Missing Information",
@@ -356,9 +370,10 @@ function Users() {
       }
 
       // Choose endpoint based on role
-      const endpoint = newUser.role === "admin"
-        ? "http://localhost:3000/admins/register"
-        : "http://localhost:3000/users/register";
+      const endpoint =
+        newUser.role === "admin"
+          ? "http://localhost:3000/admins/register"
+          : "http://localhost:3000/users/register";
 
       const response = await axios.post(endpoint, newUser);
 
@@ -369,7 +384,7 @@ function Users() {
           email: "",
           name: "",
           role: "",
-          department: ""
+          department: "",
         });
 
         // Refresh the tables
@@ -379,7 +394,9 @@ function Users() {
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: `${newUser.role === "admin" ? "Admin" : "User"} added successfully!`,
+          text: `${
+            newUser.role === "admin" ? "Admin" : "User"
+          } added successfully!`,
           timer: 1500,
           showConfirmButton: false,
           background: "#fff",
@@ -408,15 +425,16 @@ function Users() {
           <button
             className="lock-icon-btn"
             disabled
-            title={isCurrentlyEditing ? "You are currently editing this user" : "Another admin is editing a user"}
+            title={
+              isCurrentlyEditing
+                ? "You are currently editing this user"
+                : "Another admin is editing a user"
+            }
           >
             🔒
           </button>
         ) : (
-          <button
-            onClick={() => handleEditUser(row)}
-            className="custom-btn2"
-          >
+          <button onClick={() => handleEditUser(row)} className="custom-btn2">
             Edit
           </button>
         )}
@@ -426,7 +444,7 @@ function Users() {
           disabled={isLocked} // Disable delete button when any user is being edited
           style={{
             opacity: isLocked ? 0.5 : 1,
-            cursor: isLocked ? 'not-allowed' : 'pointer'
+            cursor: isLocked ? "not-allowed" : "pointer",
           }}
         >
           Delete
@@ -501,8 +519,9 @@ function Users() {
         <AdminSidebar isOpen={isSidebarOpen} />
 
         <div
-          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
-            }`}
+          className={`admin-content ${
+            isSidebarOpen ? "with-sidebar" : "without-sidebar"
+          }`}
           style={{ overflowY: "auto", maxHeight: "100vh" }}
         >
           <div className="admin-header">
@@ -511,7 +530,10 @@ function Users() {
           </div>
 
           <div className="admin-controls">
-            <button onClick={() => setIsAddModalOpen(true)} className="custom-btn">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="custom-btn"
+            >
               Add User
             </button>
             <input
@@ -571,8 +593,8 @@ function Users() {
                   type="text"
                   placeholder="Email"
                   value={editUser.email}
-                  disabled  // Email field is now disabled
-                  className="disabled-input"  // Add this class for styling
+                  disabled // Email field is now disabled
+                  className="disabled-input" // Add this class for styling
                 />
                 <input
                   type="text"

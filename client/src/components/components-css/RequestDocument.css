@@ -30,72 +30,73 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: calc(100vh - 120px);
-  overflow: hidden;
+  height: calc(100vh - 180px);
+  overflow: auto;
 }
 
 /* Table styling */
 .rdt_Table {
-    font-size: 0.85rem !important;
+  font-size: 0.85rem !important;
+  overflow: visible !important;
 }
 
 .rdt_TableHeader {
-    font-size: 0.9rem !important;
-    padding: 10px !important;
+  font-size: 0.9rem !important;
+  padding: 10px !important;
 }
 
 .rdt_TableHeadRow {
-    font-size: 0.85rem !important;
-    min-height: 40px !important;
+  font-size: 0.85rem !important;
+  min-height: 40px !important;
 }
 
 .rdt_TableRow {
-    min-height: 40px !important;
-    padding: 4px 0 !important;
+  min-height: 40px !important;
+  padding: 4px 0 !important;
 }
 
 .rdt_TableCell {
-    padding: 5px 20px !important;
+  padding: 5px 20px !important;
 }
 
 /* Button styling */
 .action-buttons {
-    display: flex;
-    gap: 4px;
+  display: flex;
+  gap: 4px;
 }
 
 .action-buttons button {
-    padding: 5px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
+  padding: 5px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
 }
 
 .action-buttons button svg {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Pagination styling */
 .rdt_Pagination {
-    font-size: 0.8rem !important;
-    min-height: 40px !important;
+  font-size: 0.8rem !important;
+  min-height: 40px !important;
 }
 
 /* Title styling */
 h1 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
 }
 
 /* Make table more compact overall */
 .rdt_TableBody {
-    overflow-y: auto;
-    max-height: calc(100vh - 250px);
-    /* Adjust based on your needs */
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+  /* Adjust based on your needs */
 }
 
 /* Responsive adjustments */
@@ -107,10 +108,11 @@ h1 {
   .rdt_TableCell {
     padding: 5px 10px !important;
   }
-  
+
   .requests-document-section {
     margin: 0;
     padding: 10px;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 160px);
+    overflow: auto;
   }
 }
