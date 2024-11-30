@@ -70,9 +70,9 @@ function UserDocuments() {
       setUserName(user.name);
       setUserEmail(user.email);
 
-      setFormData(prevState => ({
+      setFormData((prevState) => ({
         ...prevState,
-        email: user.email
+        email: user.email,
       }));
 
       fetchUserDocuments(user.email);
@@ -86,7 +86,9 @@ function UserDocuments() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/documents/user/${email}`);
+      const response = await fetch(
+        `http://localhost:3000/documents/user/${email}`
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -100,7 +102,6 @@ function UserDocuments() {
       } else {
         throw new Error(result.message || "Failed to fetch documents");
       }
-
     } catch (error) {
       console.error("Error fetching user documents:", error);
       toast.error("Failed to load documents: " + error.message);
@@ -141,7 +142,7 @@ function UserDocuments() {
         },
         body: JSON.stringify({
           ...formData,
-          email: userEmail
+          email: userEmail,
         }),
       });
 
@@ -216,9 +217,12 @@ function UserDocuments() {
       });
 
       if (result.isConfirmed) {
-        const response = await fetch(`http://localhost:3000/documents/${docID}`, {
-          method: "DELETE",
-        });
+        const response = await fetch(
+          `http://localhost:3000/documents/${docID}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         if (response.ok) {
           fetchUserDocuments(userEmail);
@@ -260,18 +264,30 @@ function UserDocuments() {
     { name: "Content", selector: (row) => row.content, sortable: true },
     { name: "Department", selector: (row) => row.department, sortable: true },
     { name: "Email", selector: (row) => row.email, sortable: true },
-    { name: "Status", selector: (row) => row.status, sortable: true },
+    {
+      name: "Status",
+      selector: (row) => row.status,
+      sortable: true,
+      cell: (row) => (
+        <span className={`status-badge ${row.status.toLowerCase()}`}>
+          {row.status}
+        </span>
+      ),
+    },
     {
       name: "File",
-      cell: (row) => (
+      cell: (row) =>
         row.filePath ? (
-          <a href={`http://localhost:3000/${row.filePath}`} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`http://localhost:3000/${row.filePath}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Download
           </a>
         ) : (
           "No file"
-        )
-      ),
+        ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -362,21 +378,24 @@ function UserDocuments() {
   // Add new function to handle sync
   const handleSyncFromSheets = async () => {
     try {
-      const response = await fetch('http://localhost:3000/documents/sync-sheets', {
-        method: 'POST',
-      });
+      const response = await fetch(
+        "http://localhost:3000/documents/sync-sheets",
+        {
+          method: "POST",
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Successfully synced data from Google Sheets!');
+        toast.success("Successfully synced data from Google Sheets!");
         fetchUserDocuments(userEmail); // Refresh the documents list
       } else {
-        toast.error('Failed to sync: ' + (data.error || 'Unknown error'));
+        toast.error("Failed to sync: " + (data.error || "Unknown error"));
       }
     } catch (error) {
-      console.error('Sync error:', error);
-      toast.error('Error syncing from sheets: ' + error.message);
+      console.error("Sync error:", error);
+      toast.error("Error syncing from sheets: " + error.message);
     }
   };
 
@@ -396,8 +415,9 @@ function UserDocuments() {
       />
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className={`user-dashboard-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
-          }`}
+        className={`user-dashboard-content ${
+          isSidebarOpen ? "with-sidebar" : "without-sidebar"
+        }`}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />
@@ -411,7 +431,10 @@ function UserDocuments() {
           <p>
             <i>Welcome! Here you can view and manage your document requests.</i>
           </p>
-          <div className="button-container" style={{ display: 'flex', gap: '10px' }}>
+          <div
+            className="button-container"
+            style={{ display: "flex", gap: "10px" }}
+          >
             <button onClick={handleOpenModal} className="custom-btn">
               Request Document
             </button>
@@ -432,7 +455,10 @@ function UserDocuments() {
           >
             <div className="modal-header">
               <h2>Request Document</h2>
-              <button onClick={() => setIsModalOpen(false)} className="close-button">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="close-button"
+              >
                 &times;
               </button>
             </div>
@@ -451,7 +477,9 @@ function UserDocuments() {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   required
                   className="form-control"
                 />
@@ -460,7 +488,9 @@ function UserDocuments() {
                 <label>Content:</label>
                 <textarea
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
                   required
                   className="form-control"
                 />
@@ -469,7 +499,9 @@ function UserDocuments() {
                 <label>Department:</label>
                 <select
                   value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
                   required
                   className="form-control"
                 >
@@ -482,7 +514,9 @@ function UserDocuments() {
                 </select>
               </div>
               <div className="modal-buttons">
-                <button type="submit" className="custom-btn">Submit</button>
+                <button type="submit" className="custom-btn">
+                  Submit
+                </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
