@@ -1,0 +1,337 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Layout */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+}
+
+/* Main Container */
+.admin-container {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+  transition: margin-left 0.3s ease;
+  position: relative;
+  overflow-y: auto;
+}
+
+.admin-container.with-sidebar {
+  margin-left: 250px;
+}
+
+.admin-container.without-sidebar {
+  margin-left: 0px;
+}
+
+/* Header Section */
+.admin-header {
+  padding: 20px;
+  background-color: #f5f7fa;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.admin-header p {
+  color: black;
+}
+
+/* Controls Section */
+.admin-controls {
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: black;
+}
+
+/* Table Container */
+.table-container {
+  margin: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: calc(100vh - 300px);
+  overflow: hidden;
+}
+
+/* DataTable Styles */
+.rdt_Table {
+  color: black !important;
+  background: white !important;
+}
+
+.rdt_TableHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #2c3e50 !important;
+}
+
+.rdt_TableHeadRow {
+  color: white !important;
+  font-weight: bold !important;
+  background-color: #2c3e50 !important;
+}
+
+.rdt_TableRow {
+  background-color: white !important;
+  color: black !important;
+}
+
+.rdt_TableRow:nth-child(even) {
+  background-color: #f8fafc !important;
+}
+
+.rdt_TableCell {
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 12px 15px !important;
+  color: black !important;
+}
+
+.rdt_TableBody {
+  height: calc(100% - 100px) !important;
+  overflow-y: auto !important;
+  padding-right: 3px;
+}
+
+/* Button Styles */
+.custom-btn,
+.custom-btn1,
+.custom-btn2 {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.custom-btn {
+  background-color: #4a90e2;
+}
+
+.custom-btn:hover {
+  background-color: #357abd;
+}
+
+.custom-btn1 {
+  background-color: #e74c3c;
+}
+
+.custom-btn1:hover {
+  background-color: #c0392b;
+}
+
+.custom-btn2 {
+  background-color: #f39c12;
+}
+
+.custom-btn2:hover {
+  background-color: #d68910;
+}
+
+/* Modal Styles */
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white !important;
+  padding: 25px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: black !important;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: black !important;
+  background: white !important;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Hamburger Icon */
+.hamburger-icon {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background-color: rgba(54, 69, 79, 0.65);
+  border-radius: 5px;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.hamburger-icon:hover {
+  background-color: rgba(54, 69, 79, 0.8);
+}
+
+/* Scrollbar Styles */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: rgba(54, 69, 79, 0.1);
+  border-radius: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(54, 69, 79, 0.65);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(54, 69, 79, 0.8);
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+
+  .admin-container.with-sidebar,
+  .admin-container.without-sidebar {
+    margin-left: 0;
+  }
+
+  .admin-controls {
+    flex-direction: column;
+  }
+
+  .search-input {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+
+  .admin-header,
+  .admin-controls {
+    padding: 15px;
+  }
+
+  .custom-btn,
+  .custom-btn1,
+  .custom-btn2 {
+    width: 100%;
+  }
+
+  .rdt_TableCell button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Add this new class or modify existing styles */
+.scrollable-table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 300px);
+  overflow-y: auto;
+  margin: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+.table-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+/* Dropdown Styles */
+.select-dropdown {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #f5f7fa;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.select-dropdown:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.select-dropdown option {
+  color: #333;
+  background-color: #fff;
+}
+
+.disabled-input {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+.disabled-input:hover {
+  border-color: #ddd;
+}

@@ -1,0 +1,118 @@
+/* Container styling */
+.admin-dashboard-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.admin-dashboard-content {
+  flex: 1;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+  background-color: #f5f5f5;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.admin-dashboard-content.sidebar-closed {
+  margin-left: 60px;
+}
+
+.requests-document-section {
+  padding: 15px;
+  margin: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+/* Table styling */
+.rdt_Table {
+  font-size: 0.85rem !important;
+  overflow: visible !important;
+}
+
+.rdt_TableHeader {
+  font-size: 0.9rem !important;
+  padding: 10px !important;
+}
+
+.rdt_TableHeadRow {
+  font-size: 0.85rem !important;
+  min-height: 40px !important;
+}
+
+.rdt_TableRow {
+  min-height: 40px !important;
+  padding: 4px 0 !important;
+}
+
+.rdt_TableCell {
+  padding: 5px 20px !important;
+}
+
+/* Button styling */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.action-buttons button {
+  padding: 5px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+}
+
+.action-buttons button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Pagination styling */
+.rdt_Pagination {
+  font-size: 0.8rem !important;
+  min-height: 40px !important;
+}
+
+/* Title styling */
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+/* Make table more compact overall */
+.rdt_TableBody {
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+  /* Adjust based on your needs */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .admin-dashboard-content {
+    margin-left: 0;
+    padding: 10px;
+  }
+  .rdt_TableCell {
+    padding: 5px 10px !important;
+  }
+
+  .requests-document-section {
+    margin: 0;
+    padding: 10px;
+    height: calc(100vh - 160px);
+    overflow: auto;
+  }
+}

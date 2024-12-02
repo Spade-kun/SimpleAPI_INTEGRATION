@@ -1,0 +1,755 @@
+.user-dashboard-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f5f7fa;
+}
+
+.user-dashboard-content {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f5f7fa;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+  margin-right: 300px;
+}
+
+.user-dashboard-content.with-sidebar {
+  margin-left: 250px;
+}
+
+.user-dashboard-content.without-sidebar {
+  margin-left: 60px;
+  background-color: #f5f7fa;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  padding-right: 20px;
+  background-color: #f5f7fa;
+}
+
+.sidebar.open {
+  width: 250px;
+  /* Adjust width as desired */
+}
+
+/* Sidebar CSS */
+.sidebar {
+  width: 250px;
+  color: black;
+  padding: 20px;
+  transition: transform 0.3s ease;
+  position: fixed;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+.toggle-sidebar-btn {
+  margin-bottom: 20px;
+}
+
+.hamburger-icon {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: transparent;
+  border: none;
+  color: #000000;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+@media screen and (max-width: 1200px) {
+  .steps-panel {
+    width: 250px;
+  }
+
+  .user-dashboard-content {
+    margin-right: 250px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .steps-panel {
+    display: none;
+    /* Hide steps panel on mobile */
+  }
+
+  .user-dashboard-content {
+    margin-right: 0;
+    padding: 10px;
+  }
+
+  .user-data-table {
+    font-size: 14px;
+  }
+}
+
+.user-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #f5f7fa;
+}
+
+.user-data-table th,
+.user-data-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.user-data-table th {
+  background-color: #f5f7fa;
+  font-weight: bold;
+}
+
+.user-data-table tr:nth-child(even) {
+  background-color: #ffa494;
+}
+
+.user-data-table tr:hover {
+  background-color: #ff9485;
+}
+
+/* Steps Panel (Right Sidebar) Styles */
+.steps-panel {
+  width: 300px;
+  height: 100vh;
+  background-color: #fff;
+  padding: 20px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  z-index: 1000;
+  border-left: 1px solid #eee;
+}
+
+.steps-panel h2 {
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.steps-panel h3 {
+  color: white;
+}
+
+/* Add these styles to adjust the modal position */
+.modal-dialog {
+  margin-top: 100px !important;
+  /* Adjust this value as needed */
+}
+
+/* If you want to make it even more specific */
+.modal.show .modal-dialog {
+  margin-top: 300px !important;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+/* Form styles */
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+form button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+form button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button.edit-btn {
+  color: #007bff;
+}
+
+.icon-button.edit-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
+.icon-button.delete-btn {
+  color: #dc3545;
+}
+
+.icon-button.delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+/* Optional: Add tooltip styles */
+.icon-button {
+  position: relative;
+}
+
+.icon-button:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  margin-bottom: 4px;
+}
+
+.department-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.department-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Optional: Adjust the table row height if needed */
+.rdt_TableRow {
+  min-height: 40px;
+}
+
+.MuiAlert-root {
+  margin: 16px;
+  max-width: 800px;
+}
+
+/* Update table container styles */
+.table-container {
+  height: calc(100vh - 250px);
+  overflow: hidden;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.custom-btn {
+  background-color: #4a90e2;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+  background-color: #357abd;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .user-dashboard-content.with-sidebar {
+    margin-left: 0;
+  }
+
+  .user-dashboard-content.without-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* Update DataTable customization */
+.rdt_Table {
+  height: 100%;
+}
+
+.rdt_TableBody {
+  height: calc(100% - 100px) !important;
+  overflow-y: auto !important;
+}
+
+.rdt_TableHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+}
+
+.rdt_TableHeadRow {
+  background-color: #4a90e2 !important;
+  color: white !important;
+}
+
+.rdt_TableHeader {
+  padding: 15px !important;
+  font-size: large;
+}
+
+.rdt_TableCell {
+  background-color: transparent !important;
+  padding: 12px 15px !important;
+}
+
+.rdt_TableRow {
+  background-color: #ffffff !important;
+}
+
+.rdt_TableFooter {
+  background-color: #febaad !important;
+}
+
+.rdt_Pagination {
+  background-color: #ffffff !important;
+}
+
+.rdt_TableRow:hover {
+  background-color: #f0f4f8 !important;
+}
+
+/* Update main container and content area */
+.user-dashboard-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f5f7fa;
+}
+
+.user-dashboard-content {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f5f7fa;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+  margin-right: 300px;
+}
+
+/* Update main content area */
+.main-content {
+  flex: 1;
+  padding-right: 20px;
+  background-color: #f5f7fa;
+}
+
+/* Ensure background color persists when sidebar is closed */
+.user-dashboard-content.without-sidebar {
+  margin-left: 60px;
+  background-color: #f5f7fa;
+}
+
+/* Update any headers or text containers */
+h2 {
+  color: black;
+}
+
+/* Update search input if present */
+.search-input {
+  background-color: white;
+  color: black;
+  border: 1px solid #ddd;
+}
+
+/* Update any other white backgrounds */
+.content-wrapper {
+  background-color: #f5f7fa;
+}
+
+/* Additional SweetAlert2 custom styles */
+.swal2-popup {
+  padding: 1em;
+}
+
+.swal2-icon {
+  margin: 1em auto;
+}
+
+.swal2-title {
+  margin: 0 0 0.5em;
+}
+
+.swal2-timer-progress-bar {
+  background: #4a90e2;
+}
+
+/* Loading animation styles */
+.swal2-loading {
+  overflow: hidden;
+}
+
+.swal2-loader {
+  border-color: #4a90e2 transparent #4a90e2 transparent;
+}
+
+/* Success animation styles */
+.swal2-success {
+  border-color: #a5dc86;
+}
+
+.swal2-success-circular-line-left,
+.swal2-success-circular-line-right,
+.swal2-success-fix {
+  background-color: transparent !important;
+}
+
+/* Error animation styles */
+.swal2-error {
+  border-color: #f27474;
+}
+
+/* SweetAlert2 custom styles */
+.swal2-popup {
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+  padding: 2em !important;
+}
+
+.swal2-title {
+  font-size: 1.6rem !important;
+  color: #333 !important;
+  margin-bottom: 0.5em !important;
+}
+
+.swal2-html-container {
+  font-size: 1.1rem !important;
+  color: #666 !important;
+}
+
+.swal2-timer-progress-bar {
+  background: #4a90e2 !important;
+  height: 0.25em !important;
+}
+
+/* Animation for the popup */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animated {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+
+.fadeInDown {
+  animation-name: fadeInDown;
+}
+
+/* Success styles */
+.swal2-icon.swal2-success {
+  border-color: #a5dc86 !important;
+}
+
+.swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: #a5dc86 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: #a5dc86 !important;
+}
+
+/* Custom scrollbar styles */
+.rdt_TableBody::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+}
+
+.rdt_TableBody::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #febaad, #ffa494);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #ffa494, #ff8c7c);
+  cursor: pointer;
+}
+
+.rdt_TableBody::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+.rdt_TableBody {
+  scrollbar-width: thin;
+  scrollbar-color: #febaad transparent;
+}
+
+/* Ensure smooth scrolling */
+.rdt_TableBody {
+  scroll-behavior: smooth;
+}
+
+/* Add a subtle fade effect to table edges */
+.table-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+  pointer-events: none;
+}
+
+.table-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* User Dashboard Table Styles */
+.user-dashboard-content .table-container {
+  margin: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: calc(100vh - 300px);
+  overflow: hidden;
+}
+
+.user-dashboard-content .rdt_Table {
+  height: 100%;
+}
+
+.user-dashboard-content .rdt_TableHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+}
+
+.user-dashboard-content .rdt_TableBody {
+  height: calc(100% - 100px) !important;
+  overflow-y: auto !important;
+  padding-right: 3px;
+}
+
+/* User Table Scrollbar */
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    rgba(254, 186, 173, 0.8),
+    rgba(255, 164, 148, 0.9)
+  );
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.user-dashboard-content .rdt_TableBody::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 164, 148, 0.9),
+    rgba(255, 140, 124, 1)
+  );
+  border: 2px solid transparent;
+}
+
+.readonly-input {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.7;
+  border: 1px solid #ccc;
+}
+
+/* Optional: Remove the focus outline for read-only input */
+.readonly-input:focus {
+  outline: none;
+  border-color: #ccc;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.readonly-input {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.custom-btn {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.custom-btn1 {
+  padding: 0.5rem 1rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.custom-btn:hover {
+  background-color: #0056b3;
+}
+
+.custom-btn1:hover {
+  background-color: #c82333;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.813rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status-badge.approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-badge.archived {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
