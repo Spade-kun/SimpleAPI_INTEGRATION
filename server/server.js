@@ -12,6 +12,7 @@ const documentRoutes = require("./routes/documentRoutes");
 const Admin = require("./models/Admin");
 const { lockResource, unlockResource, isResourceLocked } = require('./services/lockService');
 const lockRoutes = require("./routes/lockRoutes");
+const emailService = require('./services/emailService');
 
 
 
@@ -120,16 +121,12 @@ app.post("/login/google", async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-
-    // Extract picture from payload
     const picture = payload.picture;
 
-    // Check if the user is an admin
     let user = await Admin.findOne({ email: payload.email });
     let role = 'admin';
 
     if (!user) {
-      // If not an admin, check if the user is a regular user
       user = await User.findOne({ email: payload.email });
       role = 'user';
     }
@@ -138,19 +135,21 @@ app.post("/login/google", async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
-    // Generate access token (1 hour expiration)
+    // Generate tokens
     const sessionToken = jwt.sign(
       { userId: user._id, role: role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Generate refresh token (7 days expiration)
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    // Send login notification email
+    await emailService.sendLoginNotification(user.email, user.name);
 
     res.json({
       message: "Login successful",
@@ -158,9 +157,9 @@ app.post("/login/google", async (req, res) => {
       token: sessionToken,
       refreshToken: refreshToken,
     });
-    console.log("User found:", user);
+    
   } catch (error) {
-    console.error("Error verifying Google token:", error);
+    console.error("Error during login:", error);
     res.status(401).json({ message: "Invalid token" });
   }
 });
