@@ -116,3 +116,15 @@ h1 {
     overflow: auto;
   }
 }
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

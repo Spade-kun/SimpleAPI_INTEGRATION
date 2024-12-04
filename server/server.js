@@ -157,7 +157,7 @@ app.post("/login/google", async (req, res) => {
       token: sessionToken,
       refreshToken: refreshToken,
     });
-    
+
   } catch (error) {
     console.error("Error during login:", error);
     res.status(401).json({ message: "Invalid token" });

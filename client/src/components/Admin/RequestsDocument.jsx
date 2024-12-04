@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "../Sidebar/AdminSidebar";
-import { List, Check2Circle, XCircle } from "react-bootstrap-icons";
+import { List, Check2Circle, XCircle, FileEarmarkText } from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 import "../components-css/RequestDocument.css";
@@ -145,6 +145,31 @@ function RequestsDocument() {
     window.open("https://docs.google.com/document/u/0/", "_blank");
   };
 
+  const handleDownloadLogs = async () => {
+    try {
+      // Make GET request to download logs endpoint
+      const response = await axios.get('http://localhost:3000/documents/download-logs', {
+        responseType: 'blob', // Important for handling PDF files
+      });
+
+      // Create a blob from the PDF stream
+      const file = new Blob([response.data], { type: 'application/pdf' });
+
+      // Create a link element and trigger download
+      const fileURL = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.download = 'system_logs.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      console.error('Error downloading logs:', error);
+      alert('Error downloading logs');
+    }
+  };
+
   return (
     <div className="admin-dashboard-container">
       <AdminSidebar isOpen={isSidebarOpen} />
@@ -157,9 +182,15 @@ function RequestsDocument() {
         </button>
         <div className="main-content">
           <h1>Requests Document</h1>
-          <button className="btn btn-primary" onClick={openGoogleDocs}>
-            Edit Document
-          </button>
+          <div className="button-group">
+            <button className="btn btn-primary mx-2" onClick={openGoogleDocs}>
+              Edit Document
+            </button>
+            <button className="btn btn-secondary" onClick={handleDownloadLogs}>
+              <FileEarmarkText size={16} className="me-2" />
+              Download Logs
+            </button>
+          </div>
           <div className="requests-document-section">
             <DataTable
               title="Document Requests"

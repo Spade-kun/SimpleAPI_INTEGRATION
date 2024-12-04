@@ -29,6 +29,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-google-token": "^0.1.2",
     "passport-jwt": "^4.0.1",
+    "pdfkit": "^0.15.1",
     "uuid": "^11.0.2"
   },
   "devDependencies": {
