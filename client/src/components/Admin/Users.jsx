@@ -66,6 +66,8 @@ function Users() {
   const [editingUsers, setEditingUsers] = useState({});
   const [editingUserId, setEditingUserId] = useState(null);
   const [lockTimer, setLockTimer] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
+  const [deleteLockTimer, setDeleteLockTimer] = useState(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -321,6 +323,36 @@ function Users() {
     }
   };
 
+  // Add this function to handle delete lock
+  const handleDeleteLock = async (user) => {
+    try {
+      const id = user.userID || user.adminID;
+
+      // Set the lock
+      await axios.patch(`http://localhost:3000/lock/delete_user`, {
+        isLocked: true,
+        userID: id,
+      });
+
+      setDeletingUserId(id);
+
+      // Set a timer to automatically release the lock after 3 minutes
+      const timer = setTimeout(async () => {
+        await axios.patch(`http://localhost:3000/lock/delete_user`, {
+          isLocked: false,
+          userID: null,
+        });
+        setDeletingUserId(null);
+        setDeleteLockTimer(null);
+      }, 3 * 60 * 1000); // 3 minutes
+
+      setDeleteLockTimer(timer);
+    } catch (error) {
+      console.error("Error setting delete lock:", error);
+    }
+  };
+
+  // Update the handleDeleteUser function
   const handleDeleteUser = async (user) => {
     // Check if user is being edited first
     if (editingUserId !== null) {
@@ -333,7 +365,21 @@ function Users() {
       return;
     }
 
+    // Check if any user is being deleted
+    if (deletingUserId !== null && deletingUserId !== user.userID && deletingUserId !== user.adminID) {
+      Swal.fire({
+        icon: "warning",
+        title: "Cannot Delete",
+        text: "Another user is currently being deleted. Please wait.",
+        background: "#fff",
+      });
+      return;
+    }
+
     try {
+      // Set the delete lock
+      await handleDeleteLock(user);
+
       const result = await Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -347,16 +393,27 @@ function Users() {
 
       if (result.isConfirmed) {
         const id = user.userID || user.adminID;
-        const endpoint =
-          user.role === "admin"
-            ? `http://localhost:3000/admins/${id}`
-            : `http://localhost:3000/users/${id}`;
+        const endpoint = user.role === "admin"
+          ? `http://localhost:3000/admins/${id}`
+          : `http://localhost:3000/users/${id}`;
 
         await axios.delete(endpoint);
+
+        // Release the delete lock
+        await axios.patch(`http://localhost:3000/lock/delete_user`, {
+          isLocked: false,
+          userID: null,
+        });
+
+        if (deleteLockTimer) {
+          clearTimeout(deleteLockTimer);
+          setDeleteLockTimer(null);
+        }
+        setDeletingUserId(null);
+
         fetchUsers();
         fetchAdmins();
 
-        // Log the admin action
         await logAdminAction('DELETE', {
           email: user.email,
           name: user.name,
@@ -373,6 +430,17 @@ function Users() {
           showConfirmButton: false,
           background: "#fff",
         });
+      } else {
+        // If cancelled, release the lock
+        await axios.patch(`http://localhost:3000/lock/delete_user`, {
+          isLocked: false,
+          userID: null,
+        });
+        if (deleteLockTimer) {
+          clearTimeout(deleteLockTimer);
+          setDeleteLockTimer(null);
+        }
+        setDeletingUserId(null);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -454,15 +522,17 @@ function Users() {
     }
   };
 
+  // Update the renderActionButtons function
   const renderActionButtons = (row) => {
     const id = row.userID || row.adminID;
-    const isLocked = editingUserId !== null;
+    const isEditLocked = editingUserId !== null;
+    const isDeleteLocked = deletingUserId !== null;
     const isCurrentlyEditing = editingUserId === id;
-    const isBeingEdited = isLocked && editingUserId === id;
+    const isCurrentlyDeleting = deletingUserId === id;
 
     return (
       <div className="action-buttons">
-        {isLocked ? (
+        {isEditLocked ? (
           <button
             className="lock-icon-btn"
             disabled
@@ -475,23 +545,47 @@ function Users() {
             🔒
           </button>
         ) : (
-          <button onClick={() => handleEditUser(row)} className="custom-btn2">
+          <button
+            onClick={() => handleEditUser(row)}
+            className="custom-btn2"
+            disabled={isDeleteLocked} // Disable all edit buttons when any delete is in progress
+            style={{
+              opacity: isDeleteLocked ? 0.5 : 1,
+              cursor: isDeleteLocked ? "not-allowed" : "pointer",
+            }}
+          >
             Edit
           </button>
         )}
-        <button
-          onClick={() => handleDeleteUser(row)}
-          className="custom-btn1"
-          disabled={isLocked} // Disable delete button when any user is being edited
-          style={{
-            opacity: isLocked ? 0.5 : 1,
-            cursor: isLocked ? "not-allowed" : "pointer",
-          }}
-        >
-          Delete
-        </button>
-        {isBeingEdited && (
-          <span className="editing-indicator" title="Currently being edited">
+
+        {isDeleteLocked ? (
+          <button
+            className="lock-icon-btn"
+            disabled
+            title={
+              isCurrentlyDeleting
+                ? "You are currently deleting this user"
+                : "Another admin is deleting a user"
+            }
+          >
+            🔒
+          </button>
+        ) : (
+          <button
+            onClick={() => handleDeleteUser(row)}
+            className="custom-btn1"
+            disabled={isEditLocked || isCurrentlyDeleting}
+            style={{
+              opacity: (isEditLocked || isCurrentlyDeleting) ? 0.5 : 1,
+              cursor: (isEditLocked || isCurrentlyDeleting) ? "not-allowed" : "pointer",
+            }}
+          >
+            Delete
+          </button>
+        )}
+
+        {(isCurrentlyEditing || isCurrentlyDeleting) && (
+          <span className="editing-indicator" title="Currently being modified">
             ✏️
           </span>
         )}
