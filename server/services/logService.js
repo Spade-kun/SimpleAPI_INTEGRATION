@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const Admin = require('../models/Admin');
 const User = require('../models/User');
 const Document = require('../models/Document');
+const AdminAction = require('../models/AdminAction');
 
 const generateLogsPDF = async (req, res) => {
     try {
@@ -9,6 +10,7 @@ const generateLogsPDF = async (req, res) => {
         const admins = await Admin.find({});
         const users = await User.find({});
         const documents = await Document.find({});
+        const adminActions = await AdminAction.find().sort({ timestamp: -1 });
 
         // Create PDF document
         const doc = new PDFDocument();
@@ -64,6 +66,21 @@ const generateLogsPDF = async (req, res) => {
             doc.text(`Status: ${document.status}`);
             doc.text(`Created By: ${document.email}`);
             doc.text(`Created At: ${document.createdAt.toLocaleString()}`);
+            doc.moveDown();
+        });
+
+        // Admin Actions
+        doc.addPage();
+        doc.fontSize(16).text('Admin Actions', { underline: true });
+        doc.moveDown();
+        adminActions.forEach(action => {
+            doc.fontSize(12).text(`Action ID: ${action.id}`);
+            doc.text(`Admin Email: ${action.adminEmail}`);
+            doc.text(`Admin Name: ${action.adminName}`);
+            doc.text(`Action Type: ${action.actionType}`);
+            doc.text(`Target User: ${JSON.stringify(action.targetUser)}`);
+            doc.text(`Details: ${action.details}`);
+            doc.text(`Timestamp: ${action.timestamp.toLocaleString()}`);
             doc.moveDown();
         });
 

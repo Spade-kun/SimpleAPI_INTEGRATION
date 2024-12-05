@@ -13,6 +13,7 @@ const Admin = require("./models/Admin");
 const { lockResource, unlockResource, isResourceLocked } = require('./services/lockService');
 const lockRoutes = require("./routes/lockRoutes");
 const emailService = require('./services/emailService');
+const adminActionRoutes = require('./routes/adminActionRoutes');
 
 
 
@@ -200,6 +201,7 @@ app.use("/users", userRoutes);
 app.use("/admins", adminRoutes);
 app.use("/documents", documentRoutes);
 app.use("/lock", lockRoutes);
+app.use('/admin-actions', adminActionRoutes);
 
 // Logout route to clear the session
 app.post("/logout", (req, res) => {
