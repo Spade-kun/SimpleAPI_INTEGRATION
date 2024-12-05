@@ -33,6 +33,22 @@ const customStyles = {
   },
 };
 
+// Add these functions to log admin actions
+const logAdminAction = async (actionType, targetUser, details) => {
+  try {
+    const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+    await axios.post('http://localhost:3000/admin-actions/log', {
+      adminEmail: userInfo.email,
+      adminName: userInfo.name,
+      actionType,
+      targetUser,
+      details
+    });
+  } catch (error) {
+    console.error('Error logging admin action:', error);
+  }
+};
+
 function Users() {
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
@@ -254,6 +270,15 @@ function Users() {
       fetchUsers();
       fetchAdmins();
 
+      // Log the admin action
+      await logAdminAction('EDIT', {
+        email: editUser.email,
+        name: editUser.name,
+        role: editUser.role,
+        department: editUser.department,
+        id: id
+      }, `Changed role from ${editUser.originalRole} to ${editUser.role}`);
+
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -331,6 +356,15 @@ function Users() {
         fetchUsers();
         fetchAdmins();
 
+        // Log the admin action
+        await logAdminAction('DELETE', {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          department: user.department,
+          id: id
+        }, `Deleted ${user.role}`);
+
         Swal.fire({
           title: "Deleted!",
           text: "User has been deleted.",
@@ -391,12 +425,19 @@ function Users() {
         fetchUsers();
         fetchAdmins();
 
+        // Log the admin action
+        await logAdminAction('ADD', {
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role,
+          department: newUser.department
+        }, `Added new ${newUser.role}`);
+
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: `${
-            newUser.role === "admin" ? "Admin" : "User"
-          } added successfully!`,
+          text: `${newUser.role === "admin" ? "Admin" : "User"
+            } added successfully!`,
           timer: 1500,
           showConfirmButton: false,
           background: "#fff",
@@ -519,9 +560,8 @@ function Users() {
         <AdminSidebar isOpen={isSidebarOpen} />
 
         <div
-          className={`admin-content ${
-            isSidebarOpen ? "with-sidebar" : "without-sidebar"
-          }`}
+          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
+            }`}
           style={{ overflowY: "auto", maxHeight: "100vh" }}
         >
           <div className="admin-header">
