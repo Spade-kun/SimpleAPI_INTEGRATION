@@ -62,6 +62,9 @@ const generateLogsPDF = async (req, res) => {
             doc.text(`Title: ${document.title}`);
             doc.text(`Department: ${document.department}`);
             doc.text(`Status: ${document.status}`);
+            if (document.status === "Rejected" && document.rejectionReason) {
+                doc.text(`Rejection Reason: ${document.rejectionReason}`);
+            }
             doc.text(`Created By: ${document.email}`);
             doc.text(`Created At: ${document.createdAt.toLocaleString()}`);
             doc.moveDown();

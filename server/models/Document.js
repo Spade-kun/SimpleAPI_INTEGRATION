@@ -8,6 +8,7 @@ const documentSchema = new mongoose.Schema(
     department: { type: String, required: true }, // Department field
     email: { type: String, required: true },
     status: { type: String, required: true, default: "Pending" },
+    rejectionReason: { type: String },
     createdAt: { type: Date, default: Date.now },
     isArchived: { type: Boolean, default: false },
     filePath: { type: String },

@@ -275,6 +275,15 @@ function UserDocuments() {
       ),
     },
     {
+      name: "Comment",
+      selector: (row) => row.rejectionReason,
+      cell: (row) => (
+        <div>
+          {row.status === "Rejected" ? row.rejectionReason : "-"}
+        </div>
+      ),
+    },
+    {
       name: "File",
       cell: (row) =>
         row.filePath ? (

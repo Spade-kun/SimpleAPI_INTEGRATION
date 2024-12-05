@@ -1,6 +1,7 @@
 const Document = require("../models/Document"); // Import the Document model
 const fs = require('fs');
 const path = require('path');
+const emailService = require("./emailService"); // Add this import
 
 const requestDocument = async (req, res) => {
   const { email, title, content, department } = req.body;
@@ -151,25 +152,55 @@ const deleteDocument = async (req, res) => {
 
 // Update document by docID
 const updateDocument = async (req, res) => {
-  const { docID } = req.params; // Get docID from URL params
-  const { title, content } = req.body; // Get new data from body
+  const { docID } = req.params;
+  const { status, rejectionReason } = req.body;
 
   try {
+    const updateData = { status };
+    
+    if (status === "Rejected") {
+      if (!rejectionReason) {
+        return res.status(400).json({
+          success: false,
+          message: "Rejection reason is required",
+        });
+      }
+      updateData.rejectionReason = rejectionReason;
+    }
+
     const document = await Document.findOneAndUpdate(
       { docID },
-      { title, content },
-      { new: true } // Return the updated document
+      updateData,
+      { new: true }
     );
 
     if (!document) {
-      return res
-        .status(404)
-        .json({ message: `Document with docID ${docID} not found!` });
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
     }
 
-    res.json({ message: `Document ${docID} updated successfully!`, document });
+    // Send email notification
+    await emailService.sendDocumentStatusEmail(
+      document.email,
+      document.title,
+      status,
+      status === "Rejected" ? rejectionReason : null
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Document ${status.toLowerCase()} successfully`,
+      document,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error updating document", error });
+    console.error("Error updating document:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating document",
+      error: error.message,
+    });
   }
 };
 

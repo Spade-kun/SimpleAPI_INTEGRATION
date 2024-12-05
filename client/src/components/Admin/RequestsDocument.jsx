@@ -7,6 +7,8 @@ import "../components-css/RequestDocument.css";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function RequestsDocument() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -15,6 +17,8 @@ function RequestsDocument() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDocID, setSelectedDocID] = useState(null);
   const [file, setFile] = useState(null);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   // Define columns for DataTable
   const columns = [
@@ -52,26 +56,23 @@ function RequestsDocument() {
     {
       name: "Actions",
       cell: (row) => (
-        <div className="action-buttons">
-          <button
-            className="btn btn-success btn-sm mx-1"
-            onClick={() => handleApprove(row.docID)}
-            disabled={row.status !== "Pending"}
+        <div className="d-flex gap-2">
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => handleStatusChange(row.docID, "Approved")}
           >
-            <Check2Circle size={16} />
-          </button>
-          <button
-            className="btn btn-danger btn-sm mx-1"
-            onClick={() => handleReject(row.docID)}
-            disabled={row.status !== "Pending"}
+            <Check2Circle /> Approve
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => handleRejectClick(row.docID)}
           >
-            <XCircle size={16} />
-          </button>
+            <XCircle /> Reject
+          </Button>
         </div>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
@@ -96,19 +97,35 @@ function RequestsDocument() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleApprove = (docID) => {
-    setSelectedDocID(docID);
-    setShowModal(true);
+  const handleStatusChange = async (docID, newStatus) => {
+    try {
+      let data = { status: newStatus };
+      
+      // If rejecting, include the rejection reason
+      if (newStatus === "Rejected") {
+        data.rejectionReason = rejectionReason;
+      }
+
+      const response = await axios.patch(
+        `http://localhost:3000/documents/${docID}`,
+        data
+      );
+
+      if (response.status === 200) {
+        toast.success(`Document ${newStatus.toLowerCase()} successfully`);
+        fetchDocuments();
+        setShowRejectionModal(false);
+        setRejectionReason("");
+      }
+    } catch (error) {
+      console.error(`Error ${newStatus.toLowerCase()} document:`, error);
+      toast.error(`Failed to ${newStatus.toLowerCase()} document`);
+    }
   };
 
-  const handleReject = async (docID) => {
-    try {
-      await axios.put(`http://localhost:3000/documents/${docID}/reject`);
-      // Refresh the documents list
-      fetchDocuments();
-    } catch (error) {
-      console.error("Error rejecting document:", error);
-    }
+  const handleRejectClick = (docID) => {
+    setSelectedDocID(docID);
+    setShowRejectionModal(true);
   };
 
   const handleFileChange = (e) => {
@@ -226,6 +243,39 @@ function RequestsDocument() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <Modal show={showRejectionModal} onHide={() => setShowRejectionModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Reject Document</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Reason for Rejection</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                required
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRejectionModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="danger" 
+            onClick={() => handleStatusChange(selectedDocID, "Rejected")}
+            disabled={!rejectionReason.trim()}
+          >
+            Reject Document
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <ToastContainer />
     </div>
   );
 }
