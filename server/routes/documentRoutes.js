@@ -16,7 +16,7 @@ const multer = require('multer');
 const path = require('path');
 
 const { syncFromSheets } = require('../services/googleSheetsService');
-const { generateLogsPDF } = require('../services/logService');
+const { generateLogsExcel } = require('../services/logService');
 
 // Configure multer to store files with their original names
 const storage = multer.diskStorage({
@@ -80,6 +80,6 @@ router.post('/sync-sheets', async (req, res) => {
   }
 });
 
-router.get('/download-logs', generateLogsPDF);
+router.get('/download-logs', generateLogsExcel);
 
 module.exports = router;

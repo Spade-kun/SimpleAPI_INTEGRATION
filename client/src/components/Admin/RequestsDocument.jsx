@@ -100,7 +100,7 @@ function RequestsDocument() {
   const handleStatusChange = async (docID, newStatus) => {
     try {
       let data = { status: newStatus };
-      
+
       // If rejecting, include the rejection reason
       if (newStatus === "Rejected") {
         data.rejectionReason = rejectionReason;
@@ -164,26 +164,27 @@ function RequestsDocument() {
 
   const handleDownloadLogs = async () => {
     try {
-      // Make GET request to download logs endpoint
       const response = await axios.get('http://localhost:3000/documents/download-logs', {
-        responseType: 'blob', // Important for handling PDF files
+        responseType: 'blob'
       });
 
-      // Create a blob from the PDF stream
-      const file = new Blob([response.data], { type: 'application/pdf' });
+      // Create a blob from the Excel data
+      const file = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
 
       // Create a link element and trigger download
       const fileURL = URL.createObjectURL(file);
       const link = document.createElement('a');
       link.href = fileURL;
-      link.download = 'system_logs.pdf';
+      link.download = 'system_logs.xlsx';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(fileURL);
     } catch (error) {
       console.error('Error downloading logs:', error);
-      alert('Error downloading logs');
+      toast.error('Error downloading logs');
     }
   };
 
@@ -266,8 +267,8 @@ function RequestsDocument() {
           <Button variant="secondary" onClick={() => setShowRejectionModal(false)}>
             Cancel
           </Button>
-          <Button 
-            variant="danger" 
+          <Button
+            variant="danger"
             onClick={() => handleStatusChange(selectedDocID, "Rejected")}
             disabled={!rejectionReason.trim()}
           >
