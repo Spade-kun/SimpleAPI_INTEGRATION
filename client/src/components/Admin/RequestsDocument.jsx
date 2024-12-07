@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "../Sidebar/AdminSidebar";
-import { List, Check2Circle, XCircle, FileEarmarkText } from "react-bootstrap-icons";
+import {
+  List,
+  Check2Circle,
+  XCircle,
+  FileEarmarkText,
+} from "react-bootstrap-icons";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 import "../components-css/RequestDocument.css";
@@ -164,27 +169,30 @@ function RequestsDocument() {
 
   const handleDownloadLogs = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/documents/download-logs', {
-        responseType: 'blob'
-      });
+      const response = await axios.get(
+        "http://localhost:3000/documents/download-logs",
+        {
+          responseType: "blob",
+        }
+      );
 
       // Create a blob from the Excel data
       const file = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
       // Create a link element and trigger download
       const fileURL = URL.createObjectURL(file);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = fileURL;
-      link.download = 'system_logs.xlsx';
+      link.download = "system_logs.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(fileURL);
     } catch (error) {
-      console.error('Error downloading logs:', error);
-      toast.error('Error downloading logs');
+      console.error("Error downloading logs:", error);
+      toast.error("Error downloading logs");
     }
   };
 
@@ -199,7 +207,7 @@ function RequestsDocument() {
           <List size={24} />
         </button>
         <div className="main-content">
-          <h1>Requests Document</h1>
+          <h1>Requested Documents</h1>
           <div className="button-group">
             <button className="btn btn-primary mx-2" onClick={openGoogleDocs}>
               Edit Document
@@ -211,7 +219,7 @@ function RequestsDocument() {
           </div>
           <div className="requests-document-section">
             <DataTable
-              title="Document Requests"
+              title="Requested Documents"
               columns={columns}
               data={documents}
               pagination
@@ -244,7 +252,10 @@ function RequestsDocument() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Modal show={showRejectionModal} onHide={() => setShowRejectionModal(false)}>
+      <Modal
+        show={showRejectionModal}
+        onHide={() => setShowRejectionModal(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Reject Document</Modal.Title>
         </Modal.Header>
@@ -264,7 +275,10 @@ function RequestsDocument() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRejectionModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowRejectionModal(false)}
+          >
             Cancel
           </Button>
           <Button
