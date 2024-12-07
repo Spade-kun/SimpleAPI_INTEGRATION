@@ -183,14 +183,6 @@ function AdminSidebar({ isOpen }) {
           </ListGroup.Item>
           <ListGroup.Item
             as={Link}
-            to="/account"
-            className="sidebar-item"
-            action
-          >
-            <PersonGear className="me-3" /> Account
-          </ListGroup.Item>
-          <ListGroup.Item
-            as={Link}
             to="/displayUsers"
             className="sidebar-item"
             action

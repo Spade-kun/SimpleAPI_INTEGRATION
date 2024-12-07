@@ -9,7 +9,6 @@ import RequestHistory from "./components/User/RequestHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Notifications from "./components/User/Notifications";
 import RequestsDocument from "./components/Admin/RequestsDocument";
-import Account from "./components/Admin/Account";
 import Users from "./components/Admin/Users";
 import ArchiveDocuments from "./components/User/ArchiveDocuments";
 import AdminNotifications from "./components/Admin/AdminNotifications";
@@ -33,14 +32,6 @@ function App() {
         element={
           <ProtectedRoute role="admin">
             <RequestsDocument />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/account"
-        element={
-          <ProtectedRoute role="admin">
-            <Account />
           </ProtectedRoute>
         }
       />

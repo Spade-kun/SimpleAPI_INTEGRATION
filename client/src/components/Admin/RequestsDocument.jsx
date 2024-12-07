@@ -24,6 +24,7 @@ function RequestsDocument() {
   const [file, setFile] = useState(null);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [filterText, setFilterText] = useState("");
 
   // Define columns for DataTable
   const columns = [
@@ -196,32 +197,71 @@ function RequestsDocument() {
     }
   };
 
+  const filteredItems = documents.filter((item) => {
+    const searchText = filterText.toLowerCase();
+    return (
+      item.docID?.toString().toLowerCase().includes(searchText) ||
+      item.title?.toLowerCase().includes(searchText) ||
+      item.department?.toLowerCase().includes(searchText) ||
+      item.email?.toLowerCase().includes(searchText) ||
+      item.status?.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <div className="admin-dashboard-container">
       <AdminSidebar isOpen={isSidebarOpen} />
       <div
-        className="admin-dashboard-content"
-        style={{ marginLeft: isSidebarOpen ? "" : "" }}
+        className={`admin-dashboard-content ${
+          !isSidebarOpen ? "sidebar-closed" : ""
+        }`}
+        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />
         </button>
         <div className="main-content">
-          <h1>Requested Documents</h1>
-          <div className="button-group">
-            <button className="btn btn-primary mx-2" onClick={openGoogleDocs}>
-              Edit Document
-            </button>
-            <button className="btn btn-secondary" onClick={handleDownloadLogs}>
-              <FileEarmarkText size={16} className="me-2" />
-              Download Logs
-            </button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <div>
+              <h1>Requested Documents</h1>
+              <div className="button-group">
+                <button
+                  className="btn btn-primary mx-2"
+                  onClick={openGoogleDocs}
+                >
+                  Edit Document
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleDownloadLogs}
+                >
+                  <FileEarmarkText size={16} className="me-2" />
+                  Download Logs
+                </button>
+              </div>
+            </div>
+            <div className="search-container" style={{ marginTop: "70px" }}>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search requested documents..."
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+              />
+            </div>
           </div>
           <div className="requests-document-section">
             <DataTable
               title="Requested Documents"
               columns={columns}
-              data={documents}
+              data={filteredItems}
               pagination
               progressPending={loading}
               responsive

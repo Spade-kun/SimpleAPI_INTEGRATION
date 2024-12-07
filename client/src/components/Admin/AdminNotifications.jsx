@@ -96,7 +96,7 @@ function AdminNotifications() {
             Download
           </a>
         ) : (
-          "No file"
+          <span style={{ color: "#dc3545" }}>No file</span>
         ),
       ignoreRowClick: true,
       allowOverflow: true,
@@ -109,9 +109,8 @@ function AdminNotifications() {
       <ToastContainer />
       <AdminSidebar isOpen={isSidebarOpen} />
       <div
-        className={`admin-dashboard-content ${
-          isSidebarOpen ? "with-sidebar" : "without-sidebar"
-        }`}
+        className="admin-dashboard-content"
+        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />

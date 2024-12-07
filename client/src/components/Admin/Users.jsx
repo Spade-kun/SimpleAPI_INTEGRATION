@@ -36,16 +36,16 @@ const customStyles = {
 // Add these functions to log admin actions
 const logAdminAction = async (actionType, targetUser, details) => {
   try {
-    const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-    await axios.post('http://localhost:3000/admin-actions/log', {
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+    await axios.post("http://localhost:3000/admin-actions/log", {
       adminEmail: userInfo.email,
       adminName: userInfo.name,
       actionType,
       targetUser,
-      details
+      details,
     });
   } catch (error) {
-    console.error('Error logging admin action:', error);
+    console.error("Error logging admin action:", error);
   }
 };
 
@@ -273,13 +273,17 @@ function Users() {
       fetchAdmins();
 
       // Log the admin action
-      await logAdminAction('EDIT', {
-        email: editUser.email,
-        name: editUser.name,
-        role: editUser.role,
-        department: editUser.department,
-        id: id
-      }, `Changed role from ${editUser.originalRole} to ${editUser.role}`);
+      await logAdminAction(
+        "EDIT",
+        {
+          email: editUser.email,
+          name: editUser.name,
+          role: editUser.role,
+          department: editUser.department,
+          id: id,
+        },
+        `Changed role from ${editUser.originalRole} to ${editUser.role}`
+      );
 
       Swal.fire({
         icon: "success",
@@ -366,7 +370,11 @@ function Users() {
     }
 
     // Check if any user is being deleted
-    if (deletingUserId !== null && deletingUserId !== user.userID && deletingUserId !== user.adminID) {
+    if (
+      deletingUserId !== null &&
+      deletingUserId !== user.userID &&
+      deletingUserId !== user.adminID
+    ) {
       Swal.fire({
         icon: "warning",
         title: "Cannot Delete",
@@ -393,9 +401,10 @@ function Users() {
 
       if (result.isConfirmed) {
         const id = user.userID || user.adminID;
-        const endpoint = user.role === "admin"
-          ? `http://localhost:3000/admins/${id}`
-          : `http://localhost:3000/users/${id}`;
+        const endpoint =
+          user.role === "admin"
+            ? `http://localhost:3000/admins/${id}`
+            : `http://localhost:3000/users/${id}`;
 
         await axios.delete(endpoint);
 
@@ -414,13 +423,17 @@ function Users() {
         fetchUsers();
         fetchAdmins();
 
-        await logAdminAction('DELETE', {
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          department: user.department,
-          id: id
-        }, `Deleted ${user.role}`);
+        await logAdminAction(
+          "DELETE",
+          {
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            department: user.department,
+            id: id,
+          },
+          `Deleted ${user.role}`
+        );
 
         Swal.fire({
           title: "Deleted!",
@@ -494,18 +507,23 @@ function Users() {
         fetchAdmins();
 
         // Log the admin action
-        await logAdminAction('ADD', {
-          email: newUser.email,
-          name: newUser.name,
-          role: newUser.role,
-          department: newUser.department
-        }, `Added new ${newUser.role}`);
+        await logAdminAction(
+          "ADD",
+          {
+            email: newUser.email,
+            name: newUser.name,
+            role: newUser.role,
+            department: newUser.department,
+          },
+          `Added new ${newUser.role}`
+        );
 
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: `${newUser.role === "admin" ? "Admin" : "User"
-            } added successfully!`,
+          text: `${
+            newUser.role === "admin" ? "Admin" : "User"
+          } added successfully!`,
           timer: 1500,
           showConfirmButton: false,
           background: "#fff",
@@ -576,8 +594,9 @@ function Users() {
             className="custom-btn1"
             disabled={isEditLocked || isCurrentlyDeleting}
             style={{
-              opacity: (isEditLocked || isCurrentlyDeleting) ? 0.5 : 1,
-              cursor: (isEditLocked || isCurrentlyDeleting) ? "not-allowed" : "pointer",
+              opacity: isEditLocked || isCurrentlyDeleting ? 0.5 : 1,
+              cursor:
+                isEditLocked || isCurrentlyDeleting ? "not-allowed" : "pointer",
             }}
           >
             Delete
@@ -632,32 +651,16 @@ function Users() {
   ];
 
   return (
-    <div className="admin-layout">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-
-      <button className="hamburger-icon" onClick={toggleSidebar}>
-        <List size={24} />
-      </button>
-
-      <div className="admin-container">
-        <AdminSidebar isOpen={isSidebarOpen} />
-
-        <div
-          className={`admin-content ${isSidebarOpen ? "with-sidebar" : "without-sidebar"
-            }`}
-          style={{ overflowY: "auto", maxHeight: "100vh" }}
-        >
+    <div className="admin-dashboard-container">
+      <AdminSidebar isOpen={isSidebarOpen} />
+      <div
+        className="admin-dashboard-content"
+        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
+      >
+        <button className="hamburger-icon" onClick={toggleSidebar}>
+          <List size={24} />
+        </button>
+        <div className="main-content">
           <div className="admin-header">
             <h1>Admin Dashboard</h1>
             <p>Welcome, Admin! Here you can manage users and view reports.</p>
@@ -848,6 +851,7 @@ function Users() {
           )}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

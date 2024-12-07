@@ -753,3 +753,57 @@ h2 {
   color: #383d41;
   border: 1px solid #d6d8db;
 }
+
+/* Add these new styles for the search container and input */
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 3px 8px rgba(74, 144, 226, 0.2);
+}
+
+.search-input::placeholder {
+  color: #aaa;
+}
+
+/* Add a search icon */
+.search-container::after {
+  content: "🔍";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* Optional: Add animation on focus */
+@keyframes expandWidth {
+  from {
+    width: 250px;
+  }
+  to {
+    width: 300px;
+  }
+}
+
+.search-input:focus {
+  animation: expandWidth 0.3s ease forwards;
+}

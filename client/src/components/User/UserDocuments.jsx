@@ -55,6 +55,7 @@ function UserDocuments() {
   const [editingDocument, setEditingDocument] = useState(null);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [filterText, setFilterText] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem("sessionToken");
@@ -278,9 +279,7 @@ function UserDocuments() {
       name: "Comment",
       selector: (row) => row.rejectionReason,
       cell: (row) => (
-        <div>
-          {row.status === "Rejected" ? row.rejectionReason : "-"}
-        </div>
+        <div>{row.status === "Rejected" ? row.rejectionReason : "-"}</div>
       ),
     },
     {
@@ -407,6 +406,19 @@ function UserDocuments() {
       toast.error("Error syncing from sheets: " + error.message);
     }
   };
+
+  // Add this new function to handle search
+  const filteredItems = documents.filter((item) => {
+    const searchText = filterText.toLowerCase();
+    return (
+      item.docID?.toString().toLowerCase().includes(searchText) ||
+      item.title?.toLowerCase().includes(searchText) ||
+      item.content?.toLowerCase().includes(searchText) ||
+      item.department?.toLowerCase().includes(searchText) ||
+      item.email?.toLowerCase().includes(searchText) ||
+      item.status?.toLowerCase().includes(searchText)
+    );
+  });
 
   return (
     <div className="user-dashboard-container">
@@ -614,11 +626,29 @@ function UserDocuments() {
             )}
           </Modal>
 
-          <h2>Documents</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <h2>Documents</h2>
+            <div className="search-container">
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search documents..."
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="documents-table-container">
             <DataTable
               columns={columns}
-              data={documents}
+              data={filteredItems}
               pagination
               highlightOnHover
               striped
