@@ -15,6 +15,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import Swal from "sweetalert2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -37,6 +38,26 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Add welcome alert
+    const userInfo = sessionStorage.getItem("userInfo");
+    const welcomeShown = localStorage.getItem("welcomeShown");
+
+    if (userInfo && welcomeShown !== "true") {
+      const user = JSON.parse(userInfo);
+      Swal.fire({
+        icon: "success",
+        title: `Welcome Admin ${user.name}! 👋`,
+        showConfirmButton: false,
+        timer: 1500,
+        background: "#fff",
+        customClass: {
+          popup: "animated fadeInDown",
+        },
+      });
+      // Set the flag in localStorage
+      localStorage.setItem("welcomeShown", "true");
+    }
+
     fetchData();
   }, []);
 

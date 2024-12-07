@@ -119,21 +119,6 @@ function Users() {
     const userInfo = sessionStorage.getItem("userInfo");
     const welcomeShown = localStorage.getItem("welcomeShown");
 
-    if (userInfo && welcomeShown !== "true") {
-      const user = JSON.parse(userInfo);
-      Swal.fire({
-        icon: "success",
-        title: `Welcome Admin ${user.name}! 👋`,
-        showConfirmButton: false,
-        timer: 1500,
-        background: "#fff",
-        customClass: {
-          popup: "animated fadeInDown",
-        },
-      });
-      // Set the flag in localStorage
-      localStorage.setItem("welcomeShown", "true");
-    }
     fetchUsers();
     fetchAdmins();
   }, []);
@@ -662,8 +647,7 @@ function Users() {
         </button>
         <div className="main-content">
           <div className="admin-header">
-            <h1>Admin Dashboard</h1>
-            <p>Welcome, Admin! Here you can manage users and view reports.</p>
+            <h2>Welcome, Admin! Here you can manage users and view reports.</h2>
           </div>
 
           <div className="admin-controls">
