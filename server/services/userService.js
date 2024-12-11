@@ -1,9 +1,11 @@
 const User = require("../models/User");
 const Admin = require("../models/Admin");
+const encrypt = require("./encryptionService");
+const decrypt = require("./decryptionService");
 
 // Create a new user
 const createUser = async (req, res) => {
-  const { email, name, department, role = 'user' } = req.body;
+  const { email, name, department, role = 'user', picture } = req.body;
 
   try {
     // Check if email exists in either collection
@@ -21,7 +23,7 @@ const createUser = async (req, res) => {
     if (highestUser) {
       // Get all userIDs and sort them
       const allUsers = await User.find({}, { userID: 1 }).sort({ userID: 1 });
-      const userIDs = allUsers.map(user => user.userID);
+      const userIDs = allUsers.map(user => parseInt(user.userID));
 
       // Find the first available gap in the sequence
       nextUserID = findNextAvailableID(userIDs);
@@ -32,15 +34,20 @@ const createUser = async (req, res) => {
     if (existingUserWithID) {
       // If somehow the ID is taken, find the next truly available ID
       const allUsers = await User.find({}, { userID: 1 }).sort({ userID: 1 });
-      const userIDs = allUsers.map(user => user.userID);
+      const userIDs = allUsers.map(user => parseInt(user.userID));
       nextUserID = Math.max(...userIDs) + 1;
     }
 
+    // Encrypt the department before creating the user
+    const encryptedDepartment = encrypt(department);
+
+    // Create the user with encrypted fields
     const newUser = new User({
-      email,
-      role: 'user',
       name,
-      department,
+      role: 'user',
+      picture: picture || undefined,
+      email,
+      department: encryptedDepartment,
       userID: nextUserID
     });
 
@@ -79,20 +86,39 @@ const findNextAvailableID = (ids) => {
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({});
-    res.json(users);
+    const decryptedUsers = users.map(user => ({
+      ...user._doc,
+      department: user.department && user.department.includes(":") ? decrypt(user.department) : user.department
+    }));
+    res.json(decryptedUsers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // Get a user by userID
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findOne({ userID: req.params.userID });
+    // Try to find the user by unencrypted userID first
+    let user = await User.findOne({ userID: req.params.userID });
+
+    // If not found, try to find the user by encrypted userID
+    if (!user) {
+      const encryptedUserID = encrypt(req.params.userID);
+      user = await User.findOne({ userID: encryptedUserID });
+    }
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+
+    const decryptedUser = {
+      ...user._doc,
+      department: user.department && user.department.includes(":") ? decrypt(user.department) : user.department
+    };
+
+    res.json(decryptedUser);
   } catch (error) {
     console.error("Error fetching user by userID:", error);
     res.status(500).json({ message: "Server error" });
@@ -103,7 +129,18 @@ const getUserById = async (req, res) => {
 const searchUsersByName = async (req, res) => {
   try {
     const users = await User.find({ name: new RegExp(req.params.name, "i") });
-    res.json(users);
+    const decryptedUsers = users.map(user => {
+      try {
+        return {
+          ...user._doc,
+          department: user.department && user.department.includes(":") ? decrypt(user.department) : user.department
+        };
+      } catch (error) {
+        console.error("Error decrypting user data:", error);
+        return user;
+      }
+    });
+    res.json(decryptedUsers);
   } catch (error) {
     console.error("Error searching users by name:", error);
     res.status(500).json({ message: "Server error" });
@@ -115,27 +152,37 @@ const updateUser = async (req, res) => {
   const { name, role, picture, email, department, userID } = req.body;
 
   try {
-    // Find the user by userID and update the fields provided in the request
-    const user = await User.findOneAndUpdate(
-      { userID: req.params.userID },
-      {
-        $set: {
-          name: name || undefined,
-          role: role || undefined,
-          picture: picture || undefined,
-          email: email || undefined, // This will update the email
-          department: department || undefined,
-          userID: userID || undefined, // This will allow updating the userID if needed
-        },
-      },
-      { new: true } // This will return the updated user
-    );
+    // Encrypt the fields if they are provided in the request
+    const encryptedDepartment = department ? encrypt(department) : undefined;
+
+    // Try to find the user by unencrypted userID first
+    let user = await User.findOne({ userID: req.params.userID });
+
+    // If not found, try to find the user by encrypted userID
+    if (!user) {
+      const encryptedUserID = encrypt(req.params.userID);
+      user = await User.findOne({ userID: encryptedUserID });
+    }
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: "User updated successfully", user });
+    // Update the user with the provided fields
+    user.name = name || user.name;
+    user.role = role || user.role;
+    user.picture = picture || user.picture;
+    user.email = email || user.email;
+    user.department = encryptedDepartment || user.department;
+
+    await user.save();
+
+    const decryptedUser = {
+      ...user._doc,
+      department: user.department && user.department.includes(":") ? decrypt(user.department) : user.department
+    };
+
+    res.json({ message: "User updated successfully", user: decryptedUser });
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Server error" });
@@ -145,10 +192,19 @@ const updateUser = async (req, res) => {
 // Delete a user by userID
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findOneAndDelete({ userID: req.params.userID });
+    // Try to find the user by unencrypted userID first
+    let user = await User.findOneAndDelete({ userID: req.params.userID });
+
+    // If not found, try to find the user by encrypted userID
+    if (!user) {
+      const encryptedUserID = encrypt(req.params.userID);
+      user = await User.findOneAndDelete({ userID: encryptedUserID });
+    }
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -176,11 +232,14 @@ const createUserFromTransfer = async (req, res) => {
       nextUserID = findNextAvailableID(userIDs);
     }
 
+    // Encrypt department
+    const encryptedDepartment = encrypt(department);
+
     const newUser = new User({
       email,
       role: 'user',
       name,
-      department,
+      department: encryptedDepartment,
       userID: nextUserID
     });
 
@@ -197,6 +256,23 @@ const createUserFromTransfer = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Decrypt department
+    user.department = decrypt(user.department);
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createUser,
   createUserFromTransfer,
@@ -205,4 +281,5 @@ module.exports = {
   searchUsersByName,
   updateUser,
   deleteUser,
+  getUser,
 };

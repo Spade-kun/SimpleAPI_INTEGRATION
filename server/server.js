@@ -213,6 +213,8 @@ app.post("/logout", (req, res) => {
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static('uploads'));
 
+console.log("Loaded Encryption Key:", process.env.ENCRYPTION_KEY);
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

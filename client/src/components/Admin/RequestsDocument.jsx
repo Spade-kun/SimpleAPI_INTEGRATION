@@ -66,7 +66,8 @@ function RequestsDocument() {
           <Button
             variant="success"
             size="sm"
-            onClick={() => handleStatusChange(row.docID, "Approved")}
+            onClick={() => handleApproveClick(row.docID)}
+            disabled={row.status !== "Pending"}
           >
             <Check2Circle /> Approve
           </Button>
@@ -74,6 +75,7 @@ function RequestsDocument() {
             variant="danger"
             size="sm"
             onClick={() => handleRejectClick(row.docID)}
+            disabled={row.status !== "Pending"}
           >
             <XCircle /> Reject
           </Button>
@@ -87,7 +89,9 @@ function RequestsDocument() {
     try {
       setLoading(true);
       const response = await axios.get("http://localhost:3000/documents/");
-      setDocuments(response.data);
+      // Prioritize pending documents
+      const sortedDocs = response.data.sort((a, b) => (a.status === "Pending" ? -1 : 1));
+      setDocuments(sortedDocs);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -103,30 +107,9 @@ function RequestsDocument() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleStatusChange = async (docID, newStatus) => {
-    try {
-      let data = { status: newStatus };
-
-      // If rejecting, include the rejection reason
-      if (newStatus === "Rejected") {
-        data.rejectionReason = rejectionReason;
-      }
-
-      const response = await axios.patch(
-        `http://localhost:3000/documents/${docID}`,
-        data
-      );
-
-      if (response.status === 200) {
-        toast.success(`Document ${newStatus.toLowerCase()} successfully`);
-        fetchDocuments();
-        setShowRejectionModal(false);
-        setRejectionReason("");
-      }
-    } catch (error) {
-      console.error(`Error ${newStatus.toLowerCase()} document:`, error);
-      toast.error(`Failed to ${newStatus.toLowerCase()} document`);
-    }
+  const handleApproveClick = (docID) => {
+    setSelectedDocID(docID);
+    setShowModal(true);
   };
 
   const handleRejectClick = (docID) => {
@@ -158,9 +141,36 @@ function RequestsDocument() {
         }
       );
       setShowModal(false);
+      handleStatusChange(selectedDocID, "Approved"); // Change status after file upload
       fetchDocuments(); // Refresh the documents list
     } catch (error) {
       console.error("Error uploading file:", error);
+    }
+  };
+
+  const handleStatusChange = async (docID, newStatus) => {
+    try {
+      let data = { status: newStatus };
+
+      // If rejecting, include the rejection reason
+      if (newStatus === "Rejected") {
+        data.rejectionReason = rejectionReason;
+      }
+
+      const response = await axios.patch(
+        `http://localhost:3000/documents/${docID}`,
+        data
+      );
+
+      if (response.status === 200) {
+        toast.success(`Document ${newStatus.toLowerCase()} successfully`);
+        fetchDocuments();
+        setShowRejectionModal(false);
+        setRejectionReason("");
+      }
+    } catch (error) {
+      console.error(`Error ${newStatus.toLowerCase()} document:`, error);
+      toast.error(`Failed to ${newStatus.toLowerCase()} document`);
     }
   };
 

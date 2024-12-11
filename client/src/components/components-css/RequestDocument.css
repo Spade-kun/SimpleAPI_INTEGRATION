@@ -32,12 +32,16 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: calc(100vh - 180px);
   overflow: auto;
+  overflow-x: auto;
 }
 
 /* Table styling */
 .rdt_Table {
   font-size: 0.85rem !important;
   overflow: visible !important;
+  display: block;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .rdt_TableHeader {
@@ -97,6 +101,9 @@ h1 {
   overflow-y: auto;
   max-height: calc(100vh - 300px);
   /* Adjust based on your needs */
+  display: block;
+  width: 100%;
+  overflow-x: auto;
 }
 
 /* Responsive adjustments */

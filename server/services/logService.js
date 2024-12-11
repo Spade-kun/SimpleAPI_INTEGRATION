@@ -3,6 +3,7 @@ const AdminAction = require('../models/AdminAction');
 const Document = require('../models/Document');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
+const decrypt = require('./decryptionService');
 
 const generateLogsExcel = async (req, res) => {
     try {
@@ -28,7 +29,12 @@ const generateLogsExcel = async (req, res) => {
             { header: 'Created At', key: 'createdAt', width: 20 }
         ];
         const admins = await Admin.find();
-        adminLogsSheet.addRows(admins);
+        const decryptedAdmins = admins.map(admin => ({
+            ...admin._doc,
+            name: admin.name && admin.name.includes(":") ? decrypt(admin.name) : admin.name,
+            department: admin.department && admin.department.includes(":") ? decrypt(admin.department) : admin.department
+        }));
+        adminLogsSheet.addRows(decryptedAdmins);
 
         // Set up User Logs sheet
         userLogsSheet.columns = [
@@ -40,7 +46,12 @@ const generateLogsExcel = async (req, res) => {
             { header: 'Created At', key: 'createdAt', width: 20 }
         ];
         const users = await User.find();
-        userLogsSheet.addRows(users);
+        const decryptedUsers = users.map(user => ({
+            ...user._doc,
+            name: user.name && user.name.includes(":") ? decrypt(user.name) : user.name,
+            department: user.department && user.department.includes(":") ? decrypt(user.department) : user.department
+        }));
+        userLogsSheet.addRows(decryptedUsers);
 
         // Set up Document Logs sheet
         documentLogsSheet.columns = [
@@ -64,11 +75,22 @@ const generateLogsExcel = async (req, res) => {
             { header: 'Timestamp', key: 'timestamp', width: 20 }
         ];
         const adminActions = await AdminAction.find();
-        adminActionsSheet.addRows(adminActions.map(action => ({
-            ...action.toObject(),
-            targetUser: action.targetUser?.email || 'N/A',
-            timestamp: action.timestamp.toLocaleString()
-        })));
+        const decryptedAdminActions = adminActions.map(action => {
+            try {
+                return {
+                    ...action._doc,
+                    adminName: action.adminName && action.adminName.includes(":") ? decrypt(action.adminName) : action.adminName,
+                    targetUser: action.targetUser && typeof action.targetUser === 'string' && action.targetUser.includes(":") ? decrypt(action.targetUser) : action.targetUser
+                };
+            } catch (error) {
+                console.error("Error decrypting admin action data:", error);
+                return action;
+            }
+        });
+        adminActionsSheet.addRow(['Admin Email', 'Admin Name', 'Action Type', 'Target User', 'Details', 'Timestamp']);
+        decryptedAdminActions.forEach(action => {
+            adminActionsSheet.addRow([action.adminEmail, action.adminName, action.actionType, action.targetUser, action.details, action.timestamp]);
+        });
 
         // Style the headers
         [adminLogsSheet, userLogsSheet, documentLogsSheet, adminActionsSheet].forEach(sheet => {
@@ -102,4 +124,4 @@ const generateLogsExcel = async (req, res) => {
 
 module.exports = {
     generateLogsExcel
-}; 
+};

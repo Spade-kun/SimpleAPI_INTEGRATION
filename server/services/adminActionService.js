@@ -1,4 +1,5 @@
 const AdminAction = require('../models/AdminAction');
+const { decrypt } = require('./decryptionService');
 
 const logAdminAction = async (req, res) => {
     try {
@@ -23,7 +24,19 @@ const logAdminAction = async (req, res) => {
 const getAdminActions = async (req, res) => {
     try {
         const actions = await AdminAction.find().sort({ timestamp: -1 });
-        res.status(200).json(actions);
+        const decryptedActions = actions.map(action => {
+            try {
+                return {
+                    ...action._doc,
+                    adminName: action.adminName && action.adminName.includes(":") ? decrypt(action.adminName) : action.adminName,
+                    targetUser: action.targetUser && action.targetUser.includes(":") ? decrypt(action.targetUser) : action.targetUser
+                };
+            } catch (error) {
+                console.error("Error decrypting admin action data:", error);
+                return action;
+            }
+        });
+        res.status(200).json(decryptedActions);
     } catch (error) {
         console.error('Error fetching admin actions:', error);
         res.status(500).json({ success: false, message: 'Error fetching admin actions' });

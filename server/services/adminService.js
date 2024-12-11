@@ -1,10 +1,23 @@
 const Admin = require("../models/Admin");
 const User = require("../models/User");
+const encrypt = require("./encryptionService");
+const decrypt = require("./decryptionService");
 
 const getAllAdmins = async (req, res) => {
     try {
         const admins = await Admin.find();
-        res.status(200).json(admins);
+        const decryptedAdmins = admins.map(admin => {
+            try {
+                return {
+                    ...admin._doc,
+                    department: admin.department && admin.department.includes(":") ? decrypt(admin.department) : admin.department
+                };
+            } catch (error) {
+                console.error("Error decrypting admin data:", error);
+                return admin;
+            }
+        });
+        res.status(200).json(decryptedAdmins);
     } catch (error) {
         console.error("Error fetching admins:", error);
         res.status(500).json({ message: "Server error" });
@@ -37,11 +50,14 @@ const createAdmin = async (req, res) => {
             nextAdminID = findNextAvailableID(adminIDs);
         }
 
+        // Encrypt the department before creating the admin
+        const encryptedDepartment = encrypt(department);
+
         const newAdmin = new Admin({
             email,
             role: 'admin',
             name,
-            department,
+            department: encryptedDepartment,
             adminID: nextAdminID
         });
 
@@ -76,6 +92,9 @@ const updateAdmin = async (req, res) => {
     const { name, picture, email, department, adminID } = req.body;
 
     try {
+        // Encrypt the fields if they are provided in the request
+        const encryptedDepartment = department ? encrypt(department) : undefined;
+
         const admin = await Admin.findOneAndUpdate(
             { adminID: req.params.adminID },
             {
@@ -83,7 +102,7 @@ const updateAdmin = async (req, res) => {
                     name: name || undefined,
                     picture: picture || undefined,
                     email: email || undefined,
-                    department: department || undefined,
+                    department: encryptedDepartment || undefined,
                     adminID: adminID || undefined,
                 },
             },
@@ -94,7 +113,13 @@ const updateAdmin = async (req, res) => {
             return res.status(404).json({ message: "Admin not found" });
         }
 
-        res.json({ message: "Admin updated successfully", admin });
+        // Decrypt the updated admin before sending the response
+        const decryptedAdmin = {
+            ...admin._doc,
+            department: admin.department && admin.department.includes(":") ? decrypt(admin.department) : admin.department
+        };
+
+        res.json({ message: "Admin updated successfully", admin: decryptedAdmin });
     } catch (error) {
         console.error("Error updating admin:", error);
         res.status(500).json({ message: "Server error" });
@@ -135,11 +160,14 @@ const createAdminFromTransfer = async (req, res) => {
             nextAdminID = findNextAvailableID(adminIDs);
         }
 
+        // Encrypt the name department before creating the admin
+        const encryptedDepartment = encrypt(department);
+
         const newAdmin = new Admin({
             email,
             role: 'admin',
             name,
-            department,
+            department: encryptedDepartment,
             adminID: nextAdminID
         });
 

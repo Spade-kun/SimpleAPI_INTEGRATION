@@ -4,7 +4,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./components-css/Login.css";
-import { Alert } from '@mui/material';
+import { Alert, CircularProgress, Backdrop } from '@mui/material';
 
 const clientId = "96467309918-sjb49jofskdnaffpravkqgu1o6p0a8eh.apps.googleusercontent.com";
 const recaptchaKey = "6Lfty3MqAAAAACp-CJm8DFxDW1GfjdR1aXqHbqpg";
@@ -13,6 +13,7 @@ function Login() {
   const navigate = useNavigate();
   const [isRecaptchaValid, setIsRecaptchaValid] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSuccess = (credentialResponse) => {
     if (!isRecaptchaValid) {
@@ -20,6 +21,7 @@ function Login() {
       return;
     }
 
+    setIsLoading(true);
     console.log("Login Success:", credentialResponse);
     const { credential } = credentialResponse;
 
@@ -54,6 +56,9 @@ function Login() {
       .catch((error) => {
         console.error("Error during login:", error);
         alert("Login failed: An error occurred while logging in.");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -69,6 +74,9 @@ function Login() {
   return (
     <GoogleOAuthProvider clientId={clientId} >
       <div className="login-page">
+        <Backdrop open={isLoading} style={{ zIndex: 1000, color: '#fff' }}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
         <div className="left-section">
           <div className="logo-container">
             <img src="../src/assets/newbuksu.png" alt="Buksu Logo" className="buksu-logo" />
