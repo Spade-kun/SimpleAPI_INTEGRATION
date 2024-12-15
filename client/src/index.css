@@ -1,16 +1,67 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+/* Set base font styles */
+body {
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Heading styles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Specific text styles */
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Form elements */
+input, select, textarea, button {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Navigation and sidebar */
+.sidebar-menu {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+/* Table text */
+.rdt_Table {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Modal content */
+.modal-content {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Footer text */
+.footer {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Status badges */
+.status-badge {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
 }
 
 a {

@@ -1,8 +1,6 @@
 .user-dashboard-container {
   display: flex;
-  min-height: 100vh;
   background-color: #f5f6fa;
-  overflow: hidden;
 }
 
 .user-dashboard-content {
@@ -11,34 +9,114 @@
   transition: margin-left 0.3s ease;
   height: 100vh;
   overflow-y: auto;
-  position: relative;
 }
+
+.user-dashboard-content1 {
+  flex: 1;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  padding: 20px 20px 0px 60px;
+  overflow-x: hidden;
+  will-change: margin-left, width;
+}
+
 
 .with-sidebar {
   margin-left: 250px;
+  width: calc(100% - 250px);
+  padding-left: 20px;
+  transition: all 0.3s ease;
 }
 
 .without-sidebar {
-  margin-left: 0;
+  width: 150%;
+  transition: all 0.3s ease;
 }
 
-.hamburger-icon {
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  transform: translateZ(0);
+}
+
+button.hamburger-icon {
   position: fixed;
+  top: 35px;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 1000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1;
+  visibility: visible;
+  color: #1a5f7a;
+  background-color: white;
+  border: none;
+  height: 80px;
+  width: 25px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+button.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 20px;
+  background-color: #1a5f7a;
+  border-radius: 2px;
+  box-shadow: -4px 0 0 #1a5f7a, 4px 0 0 #1a5f7a;
+}
+
+button.hamburger-icon:hover {
+  background-color: #f5f5f5;
+  width: 28px;
+}
+
+button.hamburger-icon.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Update the List icon to be hidden when sidebar is closed */
+button.hamburger-icon svg {
+  display: none;
+}
+
+/* Show List icon only when sidebar is open */
+.with-sidebar button.hamburger-icon {
+  width: 40px;
+  height: 40px;
   top: 20px;
   left: 20px;
-  z-index: 1001;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  background-color: rgba(54, 69, 79, 0.65);
-  border-radius: 5px;
-  color: white;
-  transition: background-color 0.3s ease;
+  transform: none;
+  border-radius: 8px;
 }
-.hamburger-icon:hover {
-  background-color: rgba(54, 69, 79, 0.8);
+
+.with-sidebar button.hamburger-icon::after {
+  display: none;
 }
+
+.with-sidebar button.hamburger-icon svg {
+  display: block;
+}
+
+.with-sidebar button.hamburger-icon:hover {
+  width: 40px;
+  background-color: rgba(26, 95, 122, 0.1);
+}
+
 /* Dashboard Header Styles */
 .dashboard-header {
   margin-bottom: 2.5rem;
@@ -68,13 +146,13 @@
   background: white;
   padding: 1.5rem;
   border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 4px 4px 4px rgba(26, 95, 122, 0.7);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 1);
 }
 
 .stat-card h3 {
@@ -112,7 +190,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 2px 2px 4px rgba(26, 95, 122, 0.7);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -141,7 +219,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4px 6px rgba(26, 95, 122, 0.7);
 }
 
 .recent-activity h2 {
@@ -226,9 +304,6 @@
     margin-left: 0;
   }
 
-  .hamburger-icon {
-    display: block;
-  }
 }
 
 @media (max-width: 768px) {

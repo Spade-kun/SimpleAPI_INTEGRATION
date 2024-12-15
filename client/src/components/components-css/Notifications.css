@@ -14,7 +14,8 @@
 }
 
 .without-sidebar {
-  margin-left: 0;
+  margin-left: -60px;
+  margin-right: -30px;
 }
 
 .notifications-table-container {

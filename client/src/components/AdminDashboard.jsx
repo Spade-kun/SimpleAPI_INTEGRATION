@@ -36,6 +36,8 @@ function AdminDashboard() {
   const [archivedDocs, setArchivedDocs] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isHamburgerVisible, setIsHamburgerVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     // Add welcome alert
@@ -60,6 +62,23 @@ function AdminDashboard() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const controlHamburger = () => {
+      if (window.scrollY > lastScrollY) { // scrolling down
+        setIsHamburgerVisible(false);
+      } else { // scrolling up
+        setIsHamburgerVisible(true);
+      }
+      setLastScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', controlHamburger);
+    
+    return () => {
+      window.removeEventListener('scroll', controlHamburger);
+    };
+  }, [lastScrollY]);
 
   const fetchData = async () => {
     try {
@@ -139,16 +158,23 @@ function AdminDashboard() {
     <div className="admin-dashboard-container">
       <AdminSidebar isOpen={isSidebarOpen} />
       <div
-        className="admin-dashboard-content"
+        className={`admin-dashboard-content ${!isSidebarOpen ? 'sidebar-closed' : ''}`}
         style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
       >
-        <button className="hamburger-icon" onClick={toggleSidebar}>
-          <List size={24} />
+        <button 
+          className={`hamburger-icon ${!isHamburgerVisible ? 'hidden' : ''}`} 
+          onClick={toggleSidebar}
+        >
+          {isSidebarOpen && <List size={24} />}
         </button>
         <div className="main-content">
-          <div className="dashboard-header">
-            <h1>Dashboard</h1>
-          </div>
+        <div className="dashboard-header">
+          <p style={{ opacity: 0.7 }}>
+            <i>Quality Assurance Office's Document Request System</i>
+          </p>
+            <h1>Dashboard Overview</h1>
+          <p>Welcome Admin!</p>
+        </div>
 
           {/* Stats Cards */}
           <div className="stats-cards">

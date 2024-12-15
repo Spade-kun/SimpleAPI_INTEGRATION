@@ -116,14 +116,13 @@ function AdminNotifications() {
           <List size={24} />
         </button>
         <div className="main-content">
-          <p style={{ opacity: 0.7 }}>
-            <i>Quality Assurance Office's Document Request System</i>
-          </p>
-          <br />
-          <h1>Document Requests</h1>
-          <p>
-            <i>View and manage pending document requests here.</i>
-          </p>
+          <div className="dashboard-header">
+            <p style={{ opacity: 0.7 }}>
+              <i>Quality Assurance Office's Document Request System</i>
+            </p>
+              <h1>Notification</h1>
+            <p>Welcome to document management notification dashboard</p>
+          </div>
 
           <div className="documents-table-container">
             <DataTable

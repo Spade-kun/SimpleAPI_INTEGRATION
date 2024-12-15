@@ -15,6 +15,7 @@ import {
   BarElement,
 } from "chart.js";
 import "./components-css/UserDashboard.css";
+import Footer from "./Footer";
 
 // Register ChartJS components
 ChartJS.register(
@@ -40,10 +41,29 @@ function UserDashboard() {
   const [monthlyRequests, setMonthlyRequests] = useState([]);
   const [departmentStats, setDepartmentStats] = useState({});
   const [recentActivity, setRecentActivity] = useState([]);
+  const [isHamburgerVisible, setIsHamburgerVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    const controlHamburger = () => {
+      if (window.scrollY > lastScrollY) { // scrolling down
+        setIsHamburgerVisible(false);
+      } else { // scrolling up
+        setIsHamburgerVisible(true);
+      }
+      setLastScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', controlHamburger);
+    
+    return () => {
+      window.removeEventListener('scroll', controlHamburger);
+    };
+  }, [lastScrollY]);
 
   const fetchDashboardData = async () => {
     try {
@@ -180,16 +200,24 @@ function UserDashboard() {
     <div className="user-dashboard-container">
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className={`user-dashboard-content ${
+        className={`user-dashboard-content1 ${
           isSidebarOpen ? "with-sidebar" : "without-sidebar"
         }`}
       >
-        <button className="hamburger-icon" onClick={toggleSidebar}>
-          <List size={24} />
+        <button 
+          className={`hamburger-icon ${!isHamburgerVisible ? 'hidden' : ''}`} 
+          onClick={toggleSidebar}
+        >
+          {isSidebarOpen && <List size={24} />}
         </button>
 
-        <div className="dashboard-header">
-          <h1>Dashboard Overview</h1>
+        <div className="main-content">
+
+          <div className="dashboard-header">
+          <p style={{ opacity: 0.7 }}>
+            <i>Quality Assurance Office's Document Request System</i>
+          </p>
+            <h1>Dashboard Overview</h1>
           <p>Welcome to your document management analytics</p>
         </div>
 
@@ -284,6 +312,8 @@ function UserDashboard() {
           </div>
         </div>
       </div>
+      <Footer />
+    </div>
     </div>
   );
 }

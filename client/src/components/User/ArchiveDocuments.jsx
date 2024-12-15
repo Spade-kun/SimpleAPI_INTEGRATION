@@ -5,6 +5,8 @@ import DataTable from "react-data-table-component";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import "../components-css/UserDashboard.css";
+import Footer from "../Footer";
 
 function ArchiveDocuments() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -108,15 +110,22 @@ function ArchiveDocuments() {
     <div className="user-dashboard-container">
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className="user-dashboard-content"
-        style={{ marginLeft: isSidebarOpen ? "250px" : "0" }}
+        className={`user-dashboard-content1 ${
+          isSidebarOpen ? "with-sidebar" : "without-sidebar"
+        }`}
       >
         <button className="hamburger-icon" onClick={toggleSidebar}>
           <List size={24} />
         </button>
         <div className="main-content">
+
+        <div className="dashboard-header">
+          <p style={{ opacity: 0.7 }}>
+            <i>Quality Assurance Office's Document Request System</i>
+          </p>
           <h1>Archive Documents</h1>
           <p>View and manage your archived documents here.</p>
+        </div>
 
           <div className="documents-table-container">
             <DataTable
@@ -130,6 +139,7 @@ function ArchiveDocuments() {
             />
           </div>
         </div>
+        <Footer />
       </div>
     </div>
   );

@@ -9,6 +9,14 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import Swal from "sweetalert2";
 import "../components-css/AdminUsers.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faEdit, 
+  faTrash, 
+  faUserPlus, 
+  faSave, 
+  faTimes 
+} from '@fortawesome/free-solid-svg-icons';
 
 Modal.setAppElement("#root");
 
@@ -453,13 +461,7 @@ function Users() {
 
   const handleAddUser = async () => {
     try {
-      // Validate required fields
-      if (
-        !newUser.email ||
-        !newUser.name ||
-        !newUser.role ||
-        !newUser.department
-      ) {
+      if (!newUser.email || !newUser.name || !newUser.role || !newUser.department) {
         Swal.fire({
           icon: "warning",
           title: "Missing Information",
@@ -469,17 +471,24 @@ function Users() {
         return;
       }
 
-      // Choose endpoint based on role
-      const endpoint =
-        newUser.role === "admin"
-          ? "http://localhost:3000/admins/register"
-          : "http://localhost:3000/users/register";
+      // Show loading state
+      Swal.fire({
+        title: 'Adding User...',
+        html: 'Please wait while we process your request.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const endpoint = newUser.role === "admin" 
+        ? "http://localhost:3000/admins/register"
+        : "http://localhost:3000/users/register";
 
       const response = await axios.post(endpoint, newUser);
 
       if (response.data) {
         setIsAddModalOpen(false);
-        // Reset the newUser state
         setNewUser({
           email: "",
           name: "",
@@ -487,28 +496,19 @@ function Users() {
           department: "",
         });
 
-        // Refresh the tables
-        fetchUsers();
-        fetchAdmins();
-
-        // Log the admin action
-        await logAdminAction(
-          "ADD",
-          {
-            email: newUser.email,
-            name: newUser.name,
-            role: newUser.role,
-            department: newUser.department,
-          },
-          `Added new ${newUser.role}`
-        );
+        await fetchUsers();
+        await fetchAdmins();
+        await logAdminAction("ADD", {
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role,
+          department: newUser.department,
+        }, `Added new ${newUser.role}`);
 
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: `${
-            newUser.role === "admin" ? "Admin" : "User"
-          } added successfully!`,
+          text: `${newUser.role === "admin" ? "Admin" : "User"} added successfully!`,
           timer: 1500,
           showConfirmButton: false,
           background: "#fff",
@@ -550,14 +550,15 @@ function Users() {
         ) : (
           <button
             onClick={() => handleEditUser(row)}
-            className="custom-btn2"
-            disabled={isDeleteLocked} // Disable all edit buttons when any delete is in progress
+            className="icon-button edit-btn"
+            disabled={isDeleteLocked}
+            title="Edit"
             style={{
               opacity: isDeleteLocked ? 0.5 : 1,
               cursor: isDeleteLocked ? "not-allowed" : "pointer",
             }}
           >
-            Edit
+            <FontAwesomeIcon icon={faEdit} />
           </button>
         )}
 
@@ -576,22 +577,16 @@ function Users() {
         ) : (
           <button
             onClick={() => handleDeleteUser(row)}
-            className="custom-btn1"
+            className="icon-button delete-btn"
             disabled={isEditLocked || isCurrentlyDeleting}
+            title="Delete"
             style={{
               opacity: isEditLocked || isCurrentlyDeleting ? 0.5 : 1,
-              cursor:
-                isEditLocked || isCurrentlyDeleting ? "not-allowed" : "pointer",
+              cursor: isEditLocked || isCurrentlyDeleting ? "not-allowed" : "pointer",
             }}
           >
-            Delete
+            <FontAwesomeIcon icon={faTrash} />
           </button>
-        )}
-
-        {(isCurrentlyEditing || isCurrentlyDeleting) && (
-          <span className="editing-indicator" title="Currently being modified">
-            ✏️
-          </span>
         )}
       </div>
     );
@@ -627,12 +622,29 @@ function Users() {
 
   const roleOptions = ["admin", "user"];
   const departmentOptions = [
-    "College of Technologies",
-    "College of Education",
-    "College of Nursing",
-    "College of Public Administration",
-    "College of Arts and Science",
-    "College of Business",
+    "Biology Department",
+    "Environmental Science Department",
+    "Physical Education Department",
+    "Mathematics Department",
+    "Information Technology Department",
+    "Economics Department",
+    "Sociology Department",
+    "Social Science Department",
+    "English Department",
+    "Community Development Department",
+    "Philosophy Department",
+    "Development Communication Department",
+    "Public Administration Department",
+    "Nursing Department",
+    "Accountancy Department",
+    "Automotive Technology Department",
+    "Electronics Technology Department",
+    "Food Technology Department",
+    "Quality Assurance Department",
+    "Human Resource Department",
+    "Research and Development Department",
+    "Financial Planning and Budget Department",
+    "Risk Management Department",
   ];
 
   return (
@@ -646,16 +658,21 @@ function Users() {
           <List size={24} />
         </button>
         <div className="main-content">
-          <div className="admin-header">
-            <h2>Welcome, Admin! Here you can manage users and view reports.</h2>
+          <div className="dashboard-header">
+            <p style={{ opacity: 0.7 }}>
+              <i>Quality Assurance Office's Document Request System</i>
+            </p>
+              <h1>Manage Users</h1>
+            <p>Welcome to your user management dashboard</p>
           </div>
 
           <div className="admin-controls">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="custom-btn"
+              className="icon-button add-btn"
+              title="Add User"
             >
-              Add User
+              <FontAwesomeIcon icon={faUserPlus} />
             </button>
             <input
               type="text"
@@ -754,11 +771,11 @@ function Users() {
                   ))}
                 </select>
                 <div className="modal-buttons">
-                  <button onClick={confirmEditUser} className="custom-btn">
-                    Confirm
+                  <button onClick={confirmEditUser} className="icon-button save-btn" title="Save">
+                    <FontAwesomeIcon icon={faSave} />
                   </button>
-                  <button onClick={cancelEditUser} className="custom-btn1">
-                    Cancel
+                  <button onClick={cancelEditUser} className="icon-button cancel-btn" title="Cancel">
+                    <FontAwesomeIcon icon={faTimes} />
                   </button>
                 </div>
               </div>

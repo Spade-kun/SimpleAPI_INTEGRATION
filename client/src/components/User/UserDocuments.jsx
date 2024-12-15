@@ -15,6 +15,7 @@ import {
   faBoxArchive,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import Footer from "../Footer";
 
 Modal.setAppElement("#root"); // For accessibility
 
@@ -334,12 +335,29 @@ function UserDocuments() {
 
   // Add departments array
   const departments = [
-    "College of Technologies",
-    "College of Education",
-    "College of Engineering",
-    "College of Architecture",
-    "College of Business",
-    // Add more departments as needed
+    "Biology Department",
+    "Environmental Science Department",
+    "Physical Education Department",
+    "Mathematics Department",
+    "Information Technology Department",
+    "Economics Department",
+    "Sociology Department",
+    "Social Science Department",
+    "English Department",
+    "Community Development Department",
+    "Philosophy Department",
+    "Development Communication Department",
+    "Public Administration Department",
+    "Nursing Department",
+    "Accountancy Department",
+    "Automotive Technology Department",
+    "Electronics Technology Department",
+    "Food Technology Department",
+    "Quality Assurance Department",
+    "Human Resource Department",
+    "Research and Development Department",
+    "Financial Planning and Budget Department",
+    "Risk Management Department",
   ];
 
   // Add function to handle document cancellation
@@ -436,7 +454,7 @@ function UserDocuments() {
       />
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className={`user-dashboard-content ${
+        className={`user-dashboard-content1 ${
           isSidebarOpen ? "with-sidebar" : "without-sidebar"
         }`}
       >
@@ -444,14 +462,17 @@ function UserDocuments() {
           <List size={24} />
         </button>
         <div>
-          <p style={{ opacity: 0.7 }}>
-            <i>Quality Assurance Office's Document Request System</i>
-          </p>
-          <br />
-          <h1>User Documents</h1>
-          <p>
-            <i>Welcome! Here you can view and manage your document requests.</i>
-          </p>
+          <div className="main-content">
+          <div className="dashboard-header">
+            <p style={{ opacity: 0.7 }}>
+              <i>Quality Assurance Office's Document Request System</i>
+            </p>
+            <h1>User Documents</h1>
+            <p>
+              <i>Welcome! Here you can view and manage your document requests.</i>
+            </p>
+          </div>
+          
           <div
             className="button-container"
             style={{ display: "flex", gap: "10px" }}
@@ -459,10 +480,10 @@ function UserDocuments() {
             <button onClick={handleOpenModal} className="custom-btn">
               Request Document
             </button>
-            <button onClick={handleGoogleFormOpen} className="custom-btn">
+            <button onClick={handleGoogleFormOpen} className="custom-btnA">
               Open Google Form
             </button>
-            <button onClick={handleSyncFromSheets} className="custom-btn">
+            <button onClick={handleSyncFromSheets} className="custom-btnB">
               Sync from Sheets
             </button>
           </div>
@@ -632,9 +653,10 @@ function UserDocuments() {
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "20px",
+              marginTop: "20px",
+              marginLeft: "20px",
             }}
           >
-            <h2>Documents</h2>
             <div className="search-container">
               <input
                 type="text"
@@ -656,9 +678,10 @@ function UserDocuments() {
               fixedHeaderScrollHeight="calc(100vh - 350px)"
             />
           </div>
-          <StepsPanel />
         </div>
       </div>
+      <Footer />
+    </div>
     </div>
   );
 }

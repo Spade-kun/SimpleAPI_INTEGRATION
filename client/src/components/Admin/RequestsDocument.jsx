@@ -12,8 +12,7 @@ import "../components-css/RequestDocument.css";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Swal from 'sweetalert2';
 
 function RequestsDocument() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -123,14 +122,28 @@ function RequestsDocument() {
 
   const handleSubmit = async () => {
     if (!file) {
-      alert("Please select a file to upload.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Please select a file to upload.',
+      });
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
+      // Show loading state
+      Swal.fire({
+        title: 'Uploading and Approving...',
+        html: 'Please wait while we process your request.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const formData = new FormData();
+      formData.append("file", file);
+
       await axios.post(
         `http://localhost:3000/documents/${selectedDocID}/upload`,
         formData,
@@ -141,18 +154,38 @@ function RequestsDocument() {
         }
       );
       setShowModal(false);
-      handleStatusChange(selectedDocID, "Approved"); // Change status after file upload
-      fetchDocuments(); // Refresh the documents list
+      await handleStatusChange(selectedDocID, "Approved");
+      await fetchDocuments();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Document approved successfully',
+      });
     } catch (error) {
       console.error("Error uploading file:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error uploading file',
+      });
     }
   };
 
   const handleStatusChange = async (docID, newStatus) => {
     try {
+      // Show loading state
+      Swal.fire({
+        title: `${newStatus === 'Approved' ? 'Approving' : 'Rejecting'}...`,
+        html: 'Please wait while we process your request.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       let data = { status: newStatus };
 
-      // If rejecting, include the rejection reason
       if (newStatus === "Rejected") {
         data.rejectionReason = rejectionReason;
       }
@@ -163,14 +196,23 @@ function RequestsDocument() {
       );
 
       if (response.status === 200) {
-        toast.success(`Document ${newStatus.toLowerCase()} successfully`);
-        fetchDocuments();
+        await fetchDocuments();
         setShowRejectionModal(false);
         setRejectionReason("");
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: `Document ${newStatus.toLowerCase()} successfully`,
+        });
       }
     } catch (error) {
       console.error(`Error ${newStatus.toLowerCase()} document:`, error);
-      toast.error(`Failed to ${newStatus.toLowerCase()} document`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Failed to ${newStatus.toLowerCase()} document`,
+      });
     }
   };
 
@@ -180,6 +222,15 @@ function RequestsDocument() {
 
   const handleDownloadLogs = async () => {
     try {
+      Swal.fire({
+        title: 'Downloading Logs...',
+        html: 'Please wait while we prepare your download.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       const response = await axios.get(
         "http://localhost:3000/documents/download-logs",
         {
@@ -187,12 +238,10 @@ function RequestsDocument() {
         }
       );
 
-      // Create a blob from the Excel data
       const file = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      // Create a link element and trigger download
       const fileURL = URL.createObjectURL(file);
       const link = document.createElement("a");
       link.href = fileURL;
@@ -201,9 +250,19 @@ function RequestsDocument() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(fileURL);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Logs downloaded successfully',
+      });
     } catch (error) {
       console.error("Error downloading logs:", error);
-      toast.error("Error downloading logs");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error downloading logs',
+      });
     }
   };
 
@@ -240,7 +299,14 @@ function RequestsDocument() {
             }}
           >
             <div>
+              
+          <div className="dashboard-header">
+            <p style={{ opacity: 0.7 }}>
+              <i>Quality Assurance Office's Document Request System</i>
+            </p>
               <h1>Requested Documents</h1>
+            <p>Welcome to your document management analytics dashboard</p>
+          </div>
               <div className="button-group">
                 <button
                   className="btn btn-primary mx-2"
@@ -256,8 +322,7 @@ function RequestsDocument() {
                   Download Logs
                 </button>
               </div>
-            </div>
-            <div className="search-container" style={{ marginTop: "70px" }}>
+              <div className="search-container" style={{ marginLeft: "15px" }}>
               <input
                 type="text"
                 className="search-input"
@@ -266,10 +331,12 @@ function RequestsDocument() {
                 onChange={(e) => setFilterText(e.target.value)}
               />
             </div>
+            </div>
+         
           </div>
           <div className="requests-document-section">
             <DataTable
-              title="Requested Documents"
+              title=""
               columns={columns}
               data={filteredItems}
               pagination
@@ -340,7 +407,6 @@ function RequestsDocument() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <ToastContainer />
     </div>
   );
 }

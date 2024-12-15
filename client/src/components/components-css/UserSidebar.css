@@ -13,7 +13,7 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 10px rgba(26, 95, 122, 0.7);
 }
 
 .sidebar.open {

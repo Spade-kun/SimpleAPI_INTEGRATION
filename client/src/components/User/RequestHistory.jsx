@@ -6,6 +6,7 @@ import DataTable from "react-data-table-component";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../components-css/RequestHistory.css";
+import Footer from "../Footer";
 
 function RequestHistory() {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ function RequestHistory() {
       />
       <UserSidebar isOpen={isSidebarOpen} />
       <div
-        className={`user-dashboard-content ${
+        className={`user-dashboard-content1 ${
           isSidebarOpen ? "with-sidebar" : "without-sidebar"
         }`}
       >
@@ -124,14 +125,17 @@ function RequestHistory() {
           <List size={24} />
         </button>
         <div className="main-content">
+          
+        <div className="dashboard-header">
           <p style={{ opacity: 0.7 }}>
             <i>Quality Assurance Office's Document Request System</i>
           </p>
-          <br />
           <h1>Request History</h1>
           <p>
             <i>View your document request history here.</i>
           </p>
+        </div>
+         
           {error ? (
             <div className="alert alert-danger">{error}</div>
           ) : (
@@ -152,6 +156,7 @@ function RequestHistory() {
             </div>
           )}
         </div>
+        <Footer />
       </div>
     </div>
   );
